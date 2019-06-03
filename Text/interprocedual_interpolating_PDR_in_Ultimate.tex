@@ -2,7 +2,7 @@
 \begin{document}
 	\newcommand{\HorizontalLine}{\rule{\linewidth}{0.3mm}}
 	
-	\title{ \HorizontalLine \\ \textbf{Interprocedual and Interpolating \\ PDR in \textsc{ULTIMATE}} \HorizontalLine}
+	\title{ \HorizontalLine \\ \textbf{Interprocedual and Interpolating \\ Property Directed Reachability in \textsc{Ultimate}} \HorizontalLine}
 	
 
 	
@@ -15,7 +15,7 @@
 	\maketitle
 	
 	\begin{abstract}
-
+	
 	\end{abstract}
 	
 	
@@ -23,16 +23,33 @@
 	\section{Introduction}
 	%-------------------------------------------------%
 	
+	In the course of my 2018 Bachelor's Thesis we devised a technique of using Property Directed Reachability on software in the software analysis framework \textsc{Ultimate}. \\
+	(@ToDo\textbf{Should I to introduce Ultimate, PDR here?})
+	Our approach was based on the technique described by Lange et al (@ToDo\textbf{(citation needed})).
+	The implementation worked solely on intraprocedual programs, meaning that if we encountered a so called procedure call, it would no longer continue the process. \\
+	Furthermore our implementation did not make use of interpolants which broaden the state space covered by blocked proof-obligations. \\
+	This project aims at expanding PDR with both, interprocedual analysis capabilities and usage of interpolants. (@ToDo \textbf{Both kinds of interpolants: Craig and selfless (citation needed)}) \par
+	Firstly we will give some background information about interprocedual program analysis and interpolants, then we will describe our changes made to the existing PDR library.
+	
 	\section{Background}
-	\subsection{Interprocedual Program Analysis}
+	\subsection{Interprocedual Program Analysis (in Ultimate?)}
+	Describe how interprocedual program analysis works, like Internal-Call-Return Transitions, what happens between call and return, context like oldvariable nad globals, variable renaming etc etc. Define extension of CFG to \textbf{I}CFG.
 	
 	\subsection{Interpolation}
+	What are interpolants and why are they useful? 1. Craig interpolants then selfless interpolation.
+	(Maybe Pros and Cons of each?)
 	
 	
 	\section{Interprocedual PDR in Ultimate}
+	what we have done to get our intraprocedual PDR to interprocedual.
 	
 	\section{Using Interpolants}
+	How we make use of the interpolants, meaning showing that we strengthen the frames with an interpolant to cover more predecessor states. Example maybe
 	
+	\section{Evaluation}
+	Run the benchmarks again and compare them to the ones from last year, where we will see (hopefully) a speedup.
+	
+	\section{Bibliography}
 
 	
 \end{document}
