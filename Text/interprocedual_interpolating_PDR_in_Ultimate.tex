@@ -28,46 +28,60 @@
 	\section{Introduction}
 	%-------------------------------------------------%
 	
-	Property Directed Reachability (PDR) was first devised as a hardware verification paradigm by Aaron Bradley (citation needed). It however showed potential as a software verification method as well.
-	In the course of my 2018 Bachelor's Thesis we devised a method of using Property Directed Reachability on software in the software analysis framework \textsc{Ultimate} (citation needed). \\
-	Our approach was based on the technique described by Lange et al (@ToDo\textbf{(citation needed})). \\ The implementation worked however solely on intraprocedual programs, meaning that if we encountered a so called procedure call, it would no longer continue the verification process. \\
+	Property Directed Reachability (PDR) was first devised as a hardware verification paradigm by Aaron Bradley \cite{DBLP:conf/vmcai/Bradley11}. It however showed potential as a software verification method as well.
+	In the course of my 2018 Bachelor's Thesis we devised a method of using Property Directed Reachability on software in the software analysis framework \textsc{Ultimate} \cite{Zitat02}. \\
+	Our approach was based on the technique described by Lange et al \cite{DBLP:conf/date/WelpK13}. \\ The implementation worked however solely on intraprocedual programs, meaning that if we encountered a call to another procedure, it would no longer continue the verification process. \\
 	Furthermore our implementation did not make use of interpolants which broaden the state space covered by blocked proof-obligations. \\
 	This project aims at expanding PDR with both interprocedual analysis capabilities and usage of interpolants. (@ToDo \textbf{Both kinds of interpolants: Craig and selfless (citation needed)}) \par
     This paper is structured as follows, firstly we will give some background definition of interprocedual program analysis, and interpolants, then we will describe our changes made to our PDR library.
 	
+	%-------------------------------------------------%
 	\section{Background}
-	In this section we will give needed definitions to show how interprocedual program verification works in Ultimate and what interpolants we use.
-	\subsection{Interprocedual Program Analysis in Ultimate}	
-	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs (CFG).
+	%-------------------------------------------------%
+	In this section we will give preliminary definitions on what interprocedual programs are and what interpolants we use.
+	
+	
+	\subsection{Interprocedual Control Flow Graphs}	
+	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
 	
 	\begin{mydef}
-		A control flow graph G = ($Loc$, $E$, $\ell_{init}$, $\ell_E$ ) of a program P is a graph where
+		A control flow graph (CFG) is a directed graph G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) of a program where
 		\begin{itemize}
 			\item  Loc is a set of program locations
-			\item $\Delta$ is a transition relation that consists of triples $(\ell, st, \ell')$, where $\ell, \ell' \in Loc$ and $st$ being a program statement
+			\item $\Delta$ is a transition relation that consists of tuples $(\ell, \ell')$, where $\ell, \ell' \in Loc$
 			\item $\ell_{init} \in Loc$ is the initial location
-			\item $\ell_E \in Loc$ an error location.
+			\item $\ell_E \in Loc$ an error location
+			\item st: $\Delta \rightarrow Stmt$ is a labeling function that assigns each transition in $\Delta$ a statement s which is either an assignment, an assume, or a havoc statement.
 		\end{itemize}
 
 	\end{mydef} \noindent
 	For example, we are given program P: \textbf{ToDo example}
+	\\ \\
+	
+
+	Most programs feature calls to other functions: \\
+	\textbf{@ToDo extend example by procedure call} \\
+	We see that foo calls bar during its run. Our current definition of CFGs do not support those calls yet, we need to expand it to deal with programs containing multiple procedures.
+	
+	
 	
 	\begin{mydef}
-		Interprocedual control flow graph
-		(control flow graph with call and return edges)
-	\end{mydef}
-	\textbf{@ToDo extend example by procedure call}
-	
-	\begin{mydef}
-		satisfiability checking with Hoare Triple checker and its specialties for call and return
+		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where we modify the labeling function st by adding two new program statements.
+		$call$ and $return$.
+		\begin{itemize}
+			\item A call statement leads the control flow from one procedure to another. We define that each procedure p in a program has a unique entry location $\ell^{entry}_p$.
+			A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q$, with st$(\ell, \ell')$ being a call statement.
+			
+			\item A return statement leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q$ and $\ell'$ is a location of caller procedure $p$, with st$(\ell, \ell')$ being a return statement.
+		\end{itemize}
+	Each return has a corresponding call.
 	\end{mydef}
 	
 	
 	\pagebreak
 		
 	\subsection{Interpolation}
-	What are interpolants and why are they useful? 1. Craig interpolants then selfless interpolation.
-	(Maybe Pros and Cons of each?)
+	Given two formulas, we can calculate an interpolant.... todo
 	
 	\begin{mydef}
 		Let $(A, B)$ be a pair of formulae such that $A \land B$ is unsatisfiable. An interpolant $I$ for $(A, B)$ is a formula fulfilling the following characteristics:
@@ -80,7 +94,21 @@
 
 	\pagebreak
 	
+	%-------------------------------------------------%
+	\section{PDR in Ultimate}
+	%-------------------------------------------------%
+	Describe how PDR works...
+	
+	
+	%-------------------------------------------------%
 	\section{Interprocedual PDR in Ultimate}
+	%-------------------------------------------------%
+	
+		
+	\begin{mydef}
+		satisfiability checking with Hoare Triple checker and its specialties for call and return
+	\end{mydef}
+	
 	What technique we used to implement interprocedual. (@ \textbf{Discussion of why we do it our way and showing why the other approaches do not work})What we have done to get our intraprocedual PDR to interprocedual.
 	
 	\section{Using Interpolants}
@@ -89,7 +117,11 @@
 	\section{Evaluation}
 	Run the benchmarks again and compare them to the ones from last year, where we will see (hopefully) a speedup.
 	
-	\section{Bibliography}
+	\pagebreak
+	
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plain}
+\bibliography{bib}
 
 	
 \end{document}
