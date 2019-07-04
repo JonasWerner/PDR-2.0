@@ -127,10 +127,29 @@ urlcolor=g1          % color of external links
 	%-------------------------------------------------%
 	In this section we will give preliminary definitions on what interprocedual programs are and what interpolants we use.
 	
+    
+    \newcommand{\tf}{\ensuremath{\varphi}\xspace}
+    \newcommand{\ctf}{\ensuremath{\hat{\varphi}}\xspace}
+    \newcommand{\invars}{\ensuremath{In}\xspace}
+    \newcommand{\outvars}{\ensuremath{Out}\xspace}
+    \newcommand{\auxvars}{\ensuremath{Aux}\xspace}
 	
 	\subsection{Interprocedual Control Flow Graphs}	
 	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
-	
+    \dd{complete transformula def}
+    \begin{mydef}
+        A transformula is a tuple $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
+        \begin{itemize}
+          \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables, 
+          \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables, 
+          \item $\auxvars \subseteq TV$ is a set of termvariables that only exist in the context of this transformula called the aux-variables, 
+          \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$ (the actual transformula), and
+          \item $\ctf$ is the closed formula over termvariables from $\invars$, $\outvars$, and $\auxvars$, i.e., every variable in \tf is replaced by a constant. 
+        \end{itemize}
+        \dd{Explain that in \ctf each invar is replaced by \emph{the} constant of the corresponding program variable, ...}
+    \end{mydef}
+    %
+    \dd{use TF instead of stmts}
 	\begin{mydef}
 		A control flow graph (CFG) is a directed graph G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) of a program where
 		\begin{itemize}
@@ -140,8 +159,8 @@ urlcolor=g1          % color of external links
 			\item $\ell_E \in Loc$ an error location
 			\item st: $\Delta \rightarrow Stmt$ is a labeling function that assigns each transition in $\Delta$ a statement s which is either an assignment, an assume, or a havoc statement.
 		\end{itemize}
-
 	\end{mydef} \noindent
+    %
 	For example, we are given program P: \jw{\textbf{ToDo example}}
 	\bigskip\bigskip\bigskip
 	Most programs feature calls to other functions: \\
