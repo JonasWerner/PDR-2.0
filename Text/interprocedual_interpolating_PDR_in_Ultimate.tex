@@ -138,7 +138,7 @@ urlcolor=g1          % color of external links
 	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
     \dd{complete transformula def}
     \begin{mydef}
-        A transformula is a tuple $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
+        A transformula (TF) is a tuple $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
         \begin{itemize}
           \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables, 
           \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables, 
@@ -149,37 +149,39 @@ urlcolor=g1          % color of external links
         \dd{Explain that in \ctf each invar is replaced by \emph{the} constant of the corresponding program variable, ...}
     \end{mydef}
     %
-    \dd{use TF instead of stmts}
+
 	\begin{mydef}
 		A control flow graph (CFG) is a directed graph G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) of a program where
 		\begin{itemize}
 			\item  Loc is a set of program locations
-			\item $\Delta$ is a transition relation that consists of tuples $(\ell, \ell')$, where $\ell, \ell' \in Loc$
+			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$, $\ell, \ell' \in Loc$
 			\item $\ell_{init} \in Loc$ is the initial location
 			\item $\ell_E \in Loc$ an error location
-			\item st: $\Delta \rightarrow Stmt$ is a labeling function that assigns each transition in $\Delta$ a statement s which is either an assignment, an assume, or a havoc statement.
+			\item st: $\Delta \rightarrow TF$ is a labeling function that assigns each transition in $\Delta$ a transformula.
 		\end{itemize}
 	\end{mydef} \noindent
-    %
+	 %
 	For example, we are given program P: \jw{\textbf{ToDo example}}
-	\bigskip\bigskip\bigskip
-	Most programs feature calls to other functions: \\
+	\bigskip\bigskip\bigskip\noindent
+	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
+	
+	\begin{mydef} In interprocedual programs we find three distinct classes of program transitions:
+		\begin{itemize}
+			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. 
+			
+			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure p in a program has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q$.
+			
+			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q$ and $\ell'$ is a location of caller procedure $p$. Each return has a corresponding call.
+		\end{itemize}
+	\end{mydef}
+	 \bigskip\noindent
+	Considering these program transitions we need to modify our definition of a CFG to get Interprocedual Control Flow Graphs. As CFGs only deal with internal transitions.
+	\begin{mydef}
+		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where transitions $(\ell, \ell' \in \Delta$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being able to represent programs that have more than one procedure as well.
+	\end{mydef}
+	
 	\jw{\textbf{@ToDo extend example by procedure call}} 
 	We see that foo calls bar during its run. Our current definition of CFGs do not support those calls yet, we need to expand it to deal with programs containing multiple procedures.
-	
-	
-	
-	\begin{mydef}
-		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where we modify the labeling function st by adding two new program statements.
-		$call$ and $return$.
-		\begin{itemize}
-			\item A call statement leads the control flow from one procedure to another. We define that each procedure p in a program has a unique entry location $\ell^{entry}_p$.
-			A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q$, with st$(\ell, \ell')$ being a call statement.
-			
-			\item A return statement leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q$ and $\ell'$ is a location of caller procedure $p$, with st$(\ell, \ell')$ being a return statement.
-		\end{itemize}
-	Each return has a corresponding call.
-	\end{mydef}
 	
 	
 	\pagebreak
@@ -196,13 +198,31 @@ urlcolor=g1          % color of external links
 		\end{itemize}
 	\end{mydef}
 
+	Next to Craig interpolation, there are other kinds of getting interpolants:
+	\begin{mydef}
+		\jw{Introduce Selfless interpolation}
+	\end{mydef}
 	\pagebreak
 	
 	%-------------------------------------------------%
 	\section{PDR in Ultimate}
 	%-------------------------------------------------%
-	Describe how PDR works...
+	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
 	
+	\subsection{PDR for Software}
+	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et \jw{Citation needed}. \\
+	Instead of unrolling the transition relation of a given program's flow graph like other verification techniques PDR checks only local transitions in a backwards-search like manner.
+	\smallskip
+	To check correctness of a program PDR uses an array of predicates attached to every program location called frames. 
+	
+	These frames formalize reachable states from the corresponding location.
+	Furthermore to check reachability of an error state PDR maintains a stack of so called proof-obligations.
+	\begin{mydef}
+		A proof-obligation is a triple po = $(t, \ell, i)$ with a predicate $t$, a program location $\ell$, and an integerm called level, $i$
+		As the name suggests proof-obligations have to be proven, if it is possible to generate a proof-obligation on level $i = 0$ we can say that the program is unsafe.
+	\end{mydef}
+	PDR is initialized by generating the first frame for each program location as $\{ false \}$ except the initial location which has frame $\{ true \}$. If there is a transition $(\ell, \ell_E)$ into an error node PDR generates its first proof-obligation $(t, \ell, 1)$ $t$ being the formula of the transformula $st(\ell, \ell_E)$.
+	An iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
 	
 	%-------------------------------------------------%
 	\section{Interprocedual PDR in Ultimate}
