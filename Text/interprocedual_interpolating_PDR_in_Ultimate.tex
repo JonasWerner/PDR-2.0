@@ -14,6 +14,7 @@
 \usepackage{listings}
 \usepackage{enumitem}
 \usepackage{amsthm}
+\usepackage{amsmath}
 
 \usepackage[%disable,%
   colorinlistoftodos,%
@@ -187,10 +188,12 @@ urlcolor=g1          % color of external links
 	\pagebreak
 		
 	\subsection{Interpolation}
-	Given two formulas, we can calculate an interpolant.... \jw{todo}
+	Interpolants are used as a way of covering a more general state space. There are multiple ways of finding interpolants for given formulas.
+	In the following we will introduce two techniques: Craig interpolation and Selfless interpolation. 
+	\jw{citation needed}
 	
 	\begin{mydef}
-		Let $(A, B)$ be a pair of formulae such that $A \land B$ is unsatisfiable. An interpolant $I$ for $(A, B)$ is a formula fulfilling the following characteristics:
+		Let $(A, B)$ be a pair of formulas such that $A \land B$ is unsatisfiable. A Craig interpolant $I$ for $(A, B)$ is a formula fulfilling the following characteristics:
 		\begin{itemize}
 			\item $A \Rightarrow I$
 			\item $I \land B$ is unsatisfiable
@@ -210,32 +213,46 @@ urlcolor=g1          % color of external links
 	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
 	
 	\subsection{PDR for Software}
-	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et \jw{Citation needed}. \\
-	Instead of unrolling the transition relation of a given program's flow graph like other verification techniques PDR checks only local transitions in a backwards-search like manner.
+	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et al. \jw{Citation needed}
+	Instead of unrolling the transition relation of a given program's CFG like other verification techniques PDR checks only local transitions in a backwards-search like manner.
 	\smallskip
-	To check correctness of a program PDR uses an array of predicates attached to every program location called frames. 
-	
-	These frames formalize reachable states from the corresponding location.
+	To check correctness of a program PDR uses an array of frames for each program location $\ell \in Loc$. 
+	\begin{mydef}
+		A frame $F_{i,\ell}$ is a predicate mapped to a program location $\ell$ and an iteration of PDR, called level, $i$.
+		Every program location $\ell \in Loc$ is assigned its own array of frames. These are used to overapproximate reachable states from the corresponding location.
+	\end{mydef}
 	Furthermore to check reachability of an error state PDR maintains a stack of so called proof-obligations.
 	\begin{mydef}
-		A proof-obligation is a triple po = $(t, \ell, i)$ with a predicate $t$, a program location $\ell$, and an integerm called level, $i$
+		A proof-obligation is a triple po = $(t, \ell, i)$ with a predicate $t$, a program location $\ell$, and an integer, called level, $i$
 		As the name suggests proof-obligations have to be proven, if it is possible to generate a proof-obligation on level $i = 0$ we can say that the program is unsafe.
 	\end{mydef}
-	PDR is initialized by generating the first frame for each program location as $\{ false \}$ except the initial location which has frame $\{ true \}$. If there is a transition $(\ell, \ell_E)$ into an error node PDR generates its first proof-obligation $(t, \ell, 1)$ $t$ being the formula of the transformula $st(\ell, \ell_E)$.
-	An iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
+	PDR is initialized by generating the first frame for each program location as $\{ false \}$ except the initial location which has frame $\{ true \}$. If there is a transition $(\ell, \ell_E)$ into an error node PDR generates its first proof-obligation $(t, \ell, 1)$ $t$ being the transformula $st(\ell, \ell_E)$.
+	In each new iteration PDR adds a new frame to the program locations. This new frame is $\{true\}$, further
+	an iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
 	
-	%-------------------------------------------------%
-	\section{Interprocedual PDR in Ultimate}
-	%-------------------------------------------------%
+	\bigskip
 	
-		
+	In the blocking phase we try to clear the proof-obligation stack, we do that by generating queries to an SMT-solver.
+	If the query is unsatisfiable, we can block the proof-obligation, meaning that the successors of the given transformula are not reachable.
+	If such a query is satisfiable we know that the corresponding proof-obligation cannot be blocked yet. We generate a new proof-obligation ...
+	
+	\bigskip
+	
+	If the proof-obligation stack could be emptied, PDR enters the propagation-phase where it scouts through the frames of the program locations to find a fixpoint. \\
 	\begin{mydef}
-		satisfiability checking with Hoare Triple checker and its specialties for call and return
+		A fixpoint in the frames is a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$. If there is such a fixpoint then the given program is safe.
 	\end{mydef}
+	If there is neither a proof-obligation on level 0 or a fixpoint in the frames, PDR starts a new iteration.
+
+	\subsection{SMT-queries}
+	As mentioned before, PDR constructs queries to an SMT-solver in the blocking-phase, those are conjunctions of three predicates. Given proof-obligation $po = (t, \ell, i)$ \\
+	Here the algorithm takes proof-obligation $(t, \ell, i)$ checks for each predecessor location $\ell_{pre}$ if the formula:
+	\begin{equation*}
+	F_{i - 1, \ell_{pre}} \land T_{\ell_{pre} \rightarrow \ell} \land t'
+	\end{equation*}
+	is satisfiable. \\
+	\jw{DO THE RENAMING STUFF}
 	
-	What technique we used to implement interprocedual. 
-    \meta{(@ \textbf{Discussion of why we do it our way and showing why the other approaches do not work})}
-    What we have done to get our intraprocedual PDR to interprocedual.
 	
 	\section{Using Interpolants}
 	How we make use of the interpolants, meaning showing that we strengthen the frames with an interpolant to cover more predecessor states. Example maybe
