@@ -232,9 +232,9 @@ urlcolor=g1          % color of external links
 	
 	\bigskip
 	
-	In the blocking phase we try to clear the proof-obligation stack, we do that by generating queries to an SMT-solver.
+	In the blocking phase we try to clear the proof-obligation stack by generating queries to an SMT-solver.
 	If the query is unsatisfiable, we can block the proof-obligation, meaning that the successors of the given transformula are not reachable.
-	If such a query is satisfiable we know that the corresponding proof-obligation cannot be blocked yet. We generate a new proof-obligation ...
+	If such a query is satisfiable we know that the corresponding proof-obligation cannot be proven unreachable yet. Given proof-obligation  $po = (t, \ell, i)$ we generate a new proof-obligation $(st(\ell_{pre}, \ell), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$.
 	
 	\bigskip
 	
@@ -245,17 +245,35 @@ urlcolor=g1          % color of external links
 	If there is neither a proof-obligation on level 0 or a fixpoint in the frames, PDR starts a new iteration.
 
 	\subsection{SMT-queries}
-	As mentioned before, PDR constructs queries to an SMT-solver in the blocking-phase, those are conjunctions of three predicates. Given proof-obligation $po = (t, \ell, i)$ \\
-	Here the algorithm takes proof-obligation $(t, \ell, i)$ checks for each predecessor location $\ell_{pre}$ if the formula:
+	As mentioned before, PDR constructs queries to an SMT-solver in the blocking-phase, those are conjunctions of three predicates. Given proof-obligation $po = (t, \ell, i)$ the algorithm checks for each predecessor location of $\ell$ $\ell_{pre}$ if the formula:
 	\begin{equation*}
 	F_{i - 1, \ell_{pre}} \land T_{\ell_{pre} \rightarrow \ell} \land t'
 	\end{equation*}
-	is satisfiable. \\
-	\jw{DO THE RENAMING STUFF}
+	is satisfiable. Here $F_{i-1, \ell_{pre}}$ is the frame of a previous iteration, $T_{\ell_{pre} \rightarrow \ell}$ is the transformula $st(\ell_{pre}, \ell)$ and $t'$ is the primed proof-obligation.
+	Our implementation treats the frame as a precondition, the proof-obligation as a post condition and the transformula as a possible transition between. Now to check the satisfiability we use the closed formula of the precondition
 	
+	\begin{mydef}
+		The closed formula $\hat{\varphi}$ of a formula $\varphi$ is a formula where every variable has been replaced by a constant. Every variable has from the beginning a default constant, this however can be replaced after an assignment of that variable for which we need to construct a new constant for the new equality (This is that with constructConstantOldVarEquality?)
+	\end{mydef}
+	In our query we use the closed formula of the frame $\hat{F}_{i-1, \ell_{pre}}$, the closed formula of the transfomula $\hat{T}_{\ell_{pre} \rightarrow \ell}$, and the closed formula $\hat{t}'$. To get $\hat{t}'$ we need to construct the primed closed formula that means next to replacing the variables with their constants we need to prime them as well. \\ 
+	So in reality we check 	\begin{equation*}
+	\hat{F}_{i - 1, \ell_{pre}} \land \hat{T}_{\ell_{pre} \rightarrow \ell} \land \hat{t}'
+	\end{equation*}
+	for satisfiability. \bigskip
 	
+	This simple renaming only works on internal transitions however, for call and returns we need to have a look at global variables, variables assigned in the procedure for generating the new constant, and other limitations.
+	\jw{todo}
 	\section{Using Interpolants}
-	How we make use of the interpolants, meaning showing that we strengthen the frames with an interpolant to cover more predecessor states. Example maybe
+	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
+	\begin{equation}
+	F_{\ell_1, i - 1} \land x' = x + 1 \land x' = 1
+	\end{equation}
+	\begin{equation}
+	F_{\ell_0, i - 1} \land x' = 2 \land x' = 1
+	\end{equation}
+	for satisfiability. \\
+	Formula (3.1) is satisfiable until we get a proof-obligation on level 1, because frame $F_{\ell_1, 0}$ is always false. \\
+	Formula (3.2) is always unsatisfiable, in each level we add $x \neq 1$ to $\ell_1$'s frames. That formula however is not strong enough to block the chain of satisfiable obligations of (3.1) in the next level, which is inefficient.
 	
 	\section{Evaluation}
 	Run the benchmarks again and compare them to the ones from last year, where we will see (hopefully) a speedup.
