@@ -15,6 +15,13 @@
 \usepackage{enumitem}
 \usepackage{amsthm}
 \usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric, arrows,automata, decorations.pathreplacing}
+\usepackage{pgf}
+\usepackage{slantsc}
+\usepackage{geometry}
+\usepackage{amssymb}
+\usepackage{subcaption}
 
 \usepackage[%disable,%
   colorinlistoftodos,%
@@ -79,6 +86,7 @@ urlcolor=g1          % color of external links
 \newcommand\mycom[1]{#1}
 \overfullrule=1mm
 \fi
+\setlength\parindent{0pt}
 
 \newcommand{\jw}[1]{\mycom{\todo[color=blue!40,inline]{\small JW: #1}}}
 \newcommand{\jwl}[1]{\mycom{\todo[color=blue!40,inline,caption={Beschreibung},nolist]{\small #1}}}
@@ -99,7 +107,7 @@ urlcolor=g1          % color of external links
 	
 
 	
-	\author{Jonas Werner \\ Supervised By: Dr. Daniel Dietsch}
+	\author{Jonas Werner \\ Dr. Daniel Dietsch}
 
 
 	
@@ -137,17 +145,46 @@ urlcolor=g1          % color of external links
 	
 	\subsection{Interprocedual Control Flow Graphs}	
 	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
-    \dd{complete transformula def}
+	
+	\begin{mydef}
+	Each program variable $(PV)$, is mapped to a tuple $(proc, tv, c, c')$ that consists of: 
+		\begin{itemize}
+			\item A label $proc$ that assigns the name of the corresponding procedure in which the program variable occurs. \\
+			If the program variable is a global variable, $proc = null$
+			\item A termvariable (TV) that is used in term operations and SMT calls.
+			\item A constant $c$
+			\item A primed constant $c'$
+		\end{itemize}
+	\end{mydef}
+	For example, assume we have the local variable $x$ that is used in procedure $foo$. $x$ is mapped to the tuple $(foo, v_x, c_x, c'_x)$.
+	%\begin{itemize}
+	%	\item $proc(x) = foo$
+	%	\item $tv(x) = t_x$
+	%	\item constant of x: $c_x$
+	%	\item primed constant of x: $c'_x$
+	%\end{itemize} 
+	
+	\begin{mydef}
+		A predicate $P = (V, \psi, \hat{\psi})$ is a tuple consisting of: 
+		\begin{itemize}
+			\item A set of program variables $V$
+			\item A formula $\psi$ over the termvariables of the program variables in $var$
+			\item A formula $\hat{\psi}$ which is the closed formula of $\psi$ where every termvariable is replaced by the corresponding program variable unprimed constant.
+		\end{itemize}
+	\end{mydef}
+	
+
     \begin{mydef}
-        A transformula (TF) is a tuple $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
+        A transformula (TF) is a tuple \\ $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
         \begin{itemize}
-          \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables, 
-          \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables, 
-          \item $\auxvars \subseteq TV$ is a set of termvariables that only exist in the context of this transformula called the aux-variables, 
-          \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$ (the actual transformula), and
-          \item $\ctf$ is the closed formula over termvariables from $\invars$, $\outvars$, and $\auxvars$, i.e., every variable in \tf is replaced by a constant. 
+          \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables
+          \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables
+          \item $\auxvars \subseteq TV$ is a set of termvariables that only exist in the context of this transformula called the aux-variables,
+          \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$
+          \item $\ctf$ is the closed formula of $\tf$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable.
+          %\item $PreProc$ is the procedure in which the program is before executing the TF.
+          %\item $SuccProc$ is the procedure the program is in after executing the TF.
         \end{itemize}
-        \dd{Explain that in \ctf each invar is replaced by \emph{the} constant of the corresponding program variable, ...}
     \end{mydef}
     %
 
@@ -157,12 +194,42 @@ urlcolor=g1          % color of external links
 			\item  Loc is a set of program locations
 			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$, $\ell, \ell' \in Loc$
 			\item $\ell_{init} \in Loc$ is the initial location
-			\item $\ell_E \in Loc$ an error location
+			\item $\ell_E \subseteq Loc$ a set of error locations
 			\item st: $\Delta \rightarrow TF$ is a labeling function that assigns each transition in $\Delta$ a transformula.
 		\end{itemize}
 	\end{mydef} \noindent
 	 %
-	For example, we are given program P: \jw{\textbf{ToDo example}}
+	 \bigskip
+
+	To illustrate these definitions, assume we are given the program represented by the CFG \\ $G = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
+	\mapsto TF_0))$
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=2cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$\ell_0$};
+		
+		\node[state] (2) [below of=1] {$\ell_1$};
+		
+		
+		
+		
+		
+		\path (1) edge node {$TF_0$} (2)
+		;
+		
+		
+		);
+		\end{tikzpicture}
+		\caption{CFG G.}
+	\end{figure}
+	
+
 	\bigskip\bigskip\bigskip\noindent
 	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
 	
@@ -175,10 +242,11 @@ urlcolor=g1          % color of external links
 			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q$ and $\ell'$ is a location of caller procedure $p$. Each return has a corresponding call.
 		\end{itemize}
 	\end{mydef}
+\jw{explain the formulas}
 	 \bigskip\noindent
 	Considering these program transitions we need to modify our definition of a CFG to get Interprocedual Control Flow Graphs. As CFGs only deal with internal transitions.
 	\begin{mydef}
-		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where transitions $(\ell, \ell' \in \Delta$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being able to represent programs that have more than one procedure as well.
+		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being able to represent programs that have more than one procedure as well.
 	\end{mydef}
 	
 	\jw{\textbf{@ToDo extend example by procedure call}} 
@@ -252,16 +320,7 @@ urlcolor=g1          % color of external links
 	is satisfiable. Here $F_{i-1, \ell_{pre}}$ is the frame of a previous iteration, $T_{\ell_{pre} \rightarrow \ell}$ is the transformula $st(\ell_{pre}, \ell)$ and $t'$ is the primed proof-obligation.
 	Our implementation treats the frame as a precondition, the proof-obligation as a post condition and the transformula as a possible transition between. Now to check the satisfiability we use the closed formula of the precondition
 	
-	\begin{mydef}
-		The closed formula $\hat{\varphi}$ of a formula $\varphi$ is a formula where every variable has been replaced by a constant. Every variable has from the beginning a default constant, this however can be replaced after an assignment of that variable for which we need to construct a new constant for the new equality (This is that with constructConstantOldVarEquality?)
-	\end{mydef}
-	In our query we use the closed formula of the frame $\hat{F}_{i-1, \ell_{pre}}$, the closed formula of the transfomula $\hat{T}_{\ell_{pre} \rightarrow \ell}$, and the closed formula $\hat{t}'$. To get $\hat{t}'$ we need to construct the primed closed formula that means next to replacing the variables with their constants we need to prime them as well. \\ 
-	So in reality we check 	\begin{equation*}
-	\hat{F}_{i - 1, \ell_{pre}} \land \hat{T}_{\ell_{pre} \rightarrow \ell} \land \hat{t}'
-	\end{equation*}
-	for satisfiability. \bigskip
-	
-	This simple renaming only works on internal transitions however, for call and returns we need to have a look at global variables, variables assigned in the procedure for generating the new constant, and other limitations.
+
 	\jw{todo}
 	\section{Using Interpolants}
 	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
