@@ -22,6 +22,8 @@
 \usepackage{geometry}
 \usepackage{amssymb}
 \usepackage{subcaption}
+\usepackage{float}
+
 
 \usepackage[%disable,%
   colorinlistoftodos,%
@@ -147,13 +149,13 @@ urlcolor=g1          % color of external links
 	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
 	
 	\begin{mydef}
-	Each program variable $(PV)$, is mapped to a tuple $(proc, tv, c, c')$ that consists of: 
+	Each program variable $(PV)$ $x$, is mapped to a tuple $(proc, tv, c, c')$ that consists of: 
 		\begin{itemize}
 			\item A label $proc$ that assigns the name of the corresponding procedure in which the program variable occurs. \\
 			If the program variable is a global variable, $proc = null$
 			\item A termvariable (TV) that is used in term operations and SMT calls.
-			\item A constant $c$
-			\item A primed constant $c'$
+			\item A constant $c_x$
+			\item A primed constant $c_x'$
 		\end{itemize}
 	\end{mydef}
 	For example, assume we have the local variable $x$ that is used in procedure $foo$. $x$ is mapped to the tuple $(foo, v_x, c_x, c'_x)$.
@@ -180,7 +182,7 @@ urlcolor=g1          % color of external links
           \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables
           \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables
           \item $\auxvars \subseteq TV$ is a set of termvariables that only exist in the context of this transformula called the aux-variables,
-          \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$
+          \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$. The actual transformula.
           \item $\ctf$ is the closed formula of $\tf$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable.
           %\item $PreProc$ is the procedure in which the program is before executing the TF.
           %\item $SuccProc$ is the procedure the program is in after executing the TF.
@@ -201,7 +203,12 @@ urlcolor=g1          % color of external links
 	 %
 	 \bigskip
 
-	To illustrate these definitions, assume we are given the program represented by the CFG \\ $G = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
+	To illustrate these definitions we will present two examples.
+	
+	\medskip
+	\jw{How to do this transition beautifully? Just writing $TF_0$ alone is confusing.}
+	\subsection*{Example 1:}
+	Assume we are given a program that is represented by CFG $G_0$ \\ $G_0 = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
 	\mapsto TF_0))$
 	\begin{figure}[h]
 		\centering
@@ -215,23 +222,65 @@ urlcolor=g1          % color of external links
 		\node[state](1){$\ell_0$};
 		
 		\node[state] (2) [below of=1] {$\ell_1$};
-		
-		
-		
-		
-		
-		\path (1) edge node {$TF_0$} (2)
+
+		\path (1) edge node {$TF_0:$ \\ $x := 0;$ \\ $y := 0$} (2)
 		;
 		
 		
 		);
 		\end{tikzpicture}
-		\caption{CFG G.}
+		\caption{CFG $G_0$.}
 	\end{figure}
+	
+	Where $TF_0 = (\invars_0, \outvars_0, \auxvars_0, \varphi_0, \hat{\varphi}_0)$ is a transformula consisting of: 
+	\begin{itemize}
+		\item $\invars_0 = \{\ \}$. There are no in-variables because $\varphi_0$ does not depend on any variables. It only assigns the out-vars to 0.
+		\item $\outvars_0 = \{ \underbrace{x}_{PV} \mapsto \underbrace{x_{out}^0}_{TV}, y \mapsto y_{out}^0\}$
+		\item $\auxvars_0 = \{ \ \} $
+		\item $\varphi_0: (x_{out}^0 = 0 \land y_{out}^0 = 0)$
+		\item $\hat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of PV $x$ and $y$.
+	\end{itemize}
+	
+	
+	\subsection*{Example 2:}
+	Assume we are given a program that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
+	\mapsto TF_1))$
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=2cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$\ell_1$};
+		
+		\node[state] (2) [below of=1] {$\ell_2$};
+		
+		\path (1) edge node {$TF_1:$ \\ $x := x + 1;$ \\ $y := x + y$} (2)
+		;
+		
+		
+		);
+		\end{tikzpicture}
+		\caption{CFG $G_1$.}
+	\end{figure}
+
+	Where $TF_1 = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \hat{\varphi}_1)$ is a transformula consisting of: 
+	\begin{itemize}
+		\item $\invars_1 = \{x \mapsto x_{in}^1, y \mapsto y_{in}^1 \}$.
+		\item $\outvars_1 = \{ x \mapsto x_{out}^1, y \mapsto y_{out}^1 \}$
+		\item $\auxvars_1 = \{x_{aux}^1 \} $
+		\item $\varphi_1: (x_{aux}^1 = x_{in}^1 + 1 \land y_{out}^1 = x_{aux}^1 + y_{in}^1 \land x_{out}^1 = x_{aux}^1)$
+		\item $\hat{\varphi_1}: (c_{aux} = c_x + 1 \land c_y' = c_{aux} + c_y \land c_x' = c_{aux})$ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of PV $x$ and $y$. $c_{aux}$ is a new constant created for the aux-var $x_{aux}$.
+	\end{itemize}
 	
 
 	\bigskip\bigskip\bigskip\noindent
 	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
+	
+	\jw{Fuse them together to show the renaming process.}
 	
 	\begin{mydef} In interprocedual programs we find three distinct classes of program transitions:
 		\begin{itemize}
