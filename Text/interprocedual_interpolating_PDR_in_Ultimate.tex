@@ -215,7 +215,7 @@ urlcolor=g1          % color of external links
 		\begin{tikzpicture}[%
 		->,
 		>=stealth', shorten >=1pt, auto,
-		node distance=2cm, scale=1, 
+		node distance=3cm, scale=1, 
 		transform shape, align=center,    
 		smallnode/.style={inner sep=1.4}
 		]
@@ -250,7 +250,7 @@ urlcolor=g1          % color of external links
 		\begin{tikzpicture}[%
 		->,
 		>=stealth', shorten >=1pt, auto,
-		node distance=2cm, scale=1, 
+		node distance=3cm, scale=1, 
 		transform shape, align=center,    
 		smallnode/.style={inner sep=1.4}
 		]
@@ -275,12 +275,41 @@ urlcolor=g1          % color of external links
 		\item $\varphi_1: (x_{aux}^1 = x_{in}^1 + 1 \land y_{out}^1 = x_{aux}^1 + y_{in}^1 \land x_{out}^1 = x_{aux}^1)$
 		\item $\hat{\varphi_1}: (c_{aux} = c_x + 1 \land c_y' = c_{aux} + c_y \land c_x' = c_{aux})$ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of PV $x$ and $y$. $c_{aux}$ is a new constant created for the aux-var $x_{aux}$.
 	\end{itemize}
+	\jw{Fuse them together to show the renaming process.}
 	
+	\subsection*{Example 3:}
+	
+		\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=3cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$\ell_0$};
+		
+		\node[state] (2) [below of=1] {$\ell_1$};
+		
+		\node[state] (3) [below of=2] {$\ell_2$};
+		
+		
+		\path (1) edge node {$TF_0:$ \\ $x := 0;$ \\ $y := 0$} (2);
+		\path (2) edge node {$TF_1:$ \\ $x := x + 1;$ \\ $y := x + y$} (3);
+		
+		
+		);
+		\end{tikzpicture}
+		\caption{CFG $G_{1 + 2}$.}
+	\end{figure}
+	To get a complete TF for this CFG, we have to ....
+		
 
 	\bigskip\bigskip\bigskip\noindent
 	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
 	
-	\jw{Fuse them together to show the renaming process.}
+
 	
 	\begin{mydef} In interprocedual programs we find three distinct classes of program transitions:
 		\begin{itemize}
@@ -370,7 +399,7 @@ urlcolor=g1          % color of external links
 	Our implementation treats the frame as a precondition, the proof-obligation as a post condition and the transformula as a possible transition between. Now to check the satisfiability we use the closed formula of the precondition
 	
 
-	\jw{todo}
+	\jw{Here comes the renaming stuff for Call and Return}
 	\section{Using Interpolants}
 	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
 	\begin{equation}
