@@ -275,10 +275,9 @@ urlcolor=g1          % color of external links
 		\item $\varphi_1: (x_{aux}^1 = x_{in}^1 + 1 \land y_{out}^1 = x_{aux}^1 + y_{in}^1 \land x_{out}^1 = x_{aux}^1)$
 		\item $\hat{\varphi_1}: (c_{aux} = c_x + 1 \land c_y' = c_{aux} + c_y \land c_x' = c_{aux})$ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of PV $x$ and $y$. $c_{aux}$ is a new constant created for the aux-var $x_{aux}$.
 	\end{itemize}
-	\jw{Fuse them together to show the renaming process.}
 	
 	\subsection*{Example 3:}
-	
+	If we take both previous example and concatenate them to one CFG, we get \\ $CFG_{1+2} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto TF_0, (\ell_1, \ell_2) \mapsto TF_1))$.
 		\begin{figure}[H]
 		\centering
 		\begin{tikzpicture}[%
@@ -303,8 +302,36 @@ urlcolor=g1          % color of external links
 		\end{tikzpicture}
 		\caption{CFG $G_{1 + 2}$.}
 	\end{figure}
-	To get a complete TF for this CFG, we have to ....
+	Where $TF_0$ and $TF_1$ are the same as before. \\
+	We see $CFG_{1+2}$ contains two TFs. For reachability analysis we can get a single formula describing the whole program by concatenating those two formulas:
+	$TF_2 = TF_0 \circ TF_1$ \\
+	
+	\begin{mydef}
+		A concatenation of two Transformulas 
+		\begin{equation*}
+		TF_{1 \circ 2} = TF_1 \circ TF_2 = (\invars_{1 \circ 2}, \outvars_{1 \circ 2}, \auxvars_{1 \circ 2}, \varphi_{1 \circ 2}, \hat{\varphi}_{1 \circ 2})
+		\end{equation*}  yields one Transformula describing the behaviour of all of them. Where \\
+		\jwl{Are in vars fresh?}
+		\begin{itemize}
+			\item $\invars_{1 \circ 2} = \invars_1$
+			\item $\outvars_{1 \circ 2} = \{ (PV, x_{out}^{fresh}) | (PV, x_{out}^{2}) \in \outvars_2 \text{ where } x_{out}^{fresh} \text{is a fresh termvariable of } x_{out}^2 \}$.
+			\item $\auxvars_{1 \circ 2} = \invars_2 \cup \{ v' | v \in \auxvars_1 \cup \auxvars_1 \text{where v' is a fresh variable of v} \}$
+			\item $\varphi_{1 \circ 2}$ is the conjunction of $\varphi_1$ in which we replace every $(PV, TV_1) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
+			\item $\hat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable. For every every $v \in \auxvars_{1 \circ 2}$ we introduce a new constant.
+		\end{itemize}
+	\end{mydef}
 		
+	\smallskip
+	
+	Using this definition, $TF_2 = TF_0 \circ TF_1$ with
+	\begin{itemize}
+		\item $\invars_2 = \invars_0 = \{ \ \}$
+		\item $\outvars_2 = \{ x \mapsto \underbrace{x_{out}^2}_{\text{fresh termvariable of } x_{out}^1}, y \mapsto y_{out}^2\}$
+		\item $\auxvars_2 = \{ x^2_{aux}, x_{in}^1, y_{in}^1 \} $
+		\item $\varphi_2 = (x_{in}^1 = 0 \land y_{in}^1 = 0 \land x_{aux}^2 = x_{in}^1 + 1 \land y_{out}^2 = x_{out}^2 + y_{in}^1 \land x_{aux}^2 = x_{out}^2)$
+		\item $\hat{\varphi_2} = (c_0 = 0 \land c_1 = 0 \land c_2 = c_0 + 1 \land c'_y = c_2 + c_2 \land c'_x = c_2)$ \\ We generated new constants for each aux-var: \\
+		$x_{in}^1 \mapsto c_0, y_{in}^1 \mapsto c_1, x^2_{aux} \mapsto c_2$
+	\end{itemize}
 
 	\bigskip\bigskip\bigskip\noindent
 	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
@@ -327,6 +354,7 @@ urlcolor=g1          % color of external links
 		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being able to represent programs that have more than one procedure as well.
 	\end{mydef}
 	
+	\jwl{Extend TF definition with predProc and succProc}
 	\jw{\textbf{@ToDo extend example by procedure call}} 
 	We see that foo calls bar during its run. Our current definition of CFGs do not support those calls yet, we need to expand it to deal with programs containing multiple procedures.
 	
@@ -359,7 +387,7 @@ urlcolor=g1          % color of external links
 	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
 	
 	\subsection{PDR for Software}
-	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et al. \jw{Citation needed}
+	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et al. \cite{DBLP:conf/fmcad/0001NN15}
 	Instead of unrolling the transition relation of a given program's CFG like other verification techniques PDR checks only local transitions in a backwards-search like manner.
 	\smallskip
 	To check correctness of a program PDR uses an array of frames for each program location $\ell \in Loc$. 
