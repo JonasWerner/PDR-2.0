@@ -328,8 +328,8 @@ urlcolor=g1          % color of external links
 		\begin{itemize}
 			\item $\invars_{1 \circ 2} = \invars_1$
 			\item $\outvars_{1 \circ 2} = \{ (PV, x_{out}^{fresh}) | (PV, x_{out}^{2}) \in \outvars_2 \text{ where } x_{out}^{fresh} \text{is a fresh termvariable of } x_{out}^2 \}$.
-			\item $\auxvars_{1 \circ 2} = \invars_2 \cup \{ v' | v \in \auxvars_1 \cup \auxvars_1 \text{where v' is a fresh variable of v} \}$
-			\item $\varphi_{1 \circ 2}$ is the conjunction of $\varphi_1$ in which we replace every $(PV, TV_1) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
+			\item $\auxvars_{1 \circ 2} = \{ v' | v \in \auxvars_1 \cup \auxvars_1 \cup range(\invars_2) \text{ where v' is a fresh variable of v} \}$
+			\item $\varphi_{1 \circ 2}$ is the conjunction of $\varphi_1$ in which we replace every $(x, x_i) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
 			\item $\hat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable. For every every $v \in \auxvars_{1 \circ 2}$ we introduce a new constant.
 		\end{itemize}
 	\end{mydef}
