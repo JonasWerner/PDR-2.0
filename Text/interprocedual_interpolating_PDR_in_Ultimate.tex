@@ -140,25 +140,25 @@ urlcolor=g1          % color of external links
 	
     
     \newcommand{\tf}{\ensuremath{\varphi}\xspace}
-    \newcommand{\ctf}{\ensuremath{\hat{\varphi}}\xspace}
+    \newcommand{\ctf}{\ensuremath{\widehat{\varphi}}\xspace}
     \newcommand{\invars}{\ensuremath{In}\xspace}
     \newcommand{\outvars}{\ensuremath{Out}\xspace}
     \newcommand{\auxvars}{\ensuremath{Aux}\xspace}
 	
-	\subsection{Interprocedual Control Flow Graphs}	
+	\subsection{Control Flow Graphs}	
 	Given a program we need a way to model its control flow to check whether given error states can be reachable or not, for that we introduce control flow graphs.
 	
 	\begin{mydef}
 	Each program variable $(PV)$ $x$, is mapped to a tuple $(proc, tv, c, c')$ that consists of: 
 		\begin{itemize}
-			\item A label $proc$ that assigns the name of the corresponding procedure in which the program variable occurs. \\
-			If the program variable is a global variable, $proc = null$
-			\item A termvariable (TV) that is used in term operations and SMT calls.
+			\item A label $proc$ that assigns the name of the corresponding procedure in which the program variable occurs. 
+			%If the program variable is a global variable, $proc = null$
+			\item A termvariable (TV) $x_0$ that is used in term operations and SMT calls.
 			\item A constant $c_x$
 			\item A primed constant $c_x'$
 		\end{itemize}
 	\end{mydef}
-	For example, assume we have the local variable $x$ that is used in procedure $foo$. $x$ is mapped to the tuple $(foo, v_x, c_x, c'_x)$.
+	For example, assume we have the local variable $x$ that is used in procedure $foo$. $x$ is mapped to the tuple $(foo, x_0, c_x, c'_x)$. 
 	%\begin{itemize}
 	%	\item $proc(x) = foo$
 	%	\item $tv(x) = t_x$
@@ -167,17 +167,17 @@ urlcolor=g1          % color of external links
 	%\end{itemize} 
 	
 	\begin{mydef}
-		A predicate $P = (V, \psi, \hat{\psi})$ is a tuple consisting of: 
+		A predicate $P = (V, \phi, \widehat{\phi})$ is a tuple consisting of: 
 		\begin{itemize}
 			\item A set of program variables $V$
-			\item A formula $\psi$ over the termvariables of the program variables in $var$
-			\item A formula $\hat{\psi}$ which is the closed formula of $\psi$ where every termvariable is replaced by the corresponding program variable unprimed constant.
+			\item A formula $\phi$ over the termvariables of the program variables in $V$
+			\item A formula $\widehat{\phi}$ which is the closed formula of $\phi$ where every termvariable is replaced by the corresponding program variable unprimed constant.
 		\end{itemize}
 	\end{mydef}
 	
 
     \begin{mydef}
-        A transformula (TF) is a tuple \\ $TF = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
+        A transformula (TF) is a tuple $\psi = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
         \begin{itemize}
           \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables
           \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables
@@ -194,10 +194,10 @@ urlcolor=g1          % color of external links
 		A control flow graph (CFG) is a directed graph G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) of a program where
 		\begin{itemize}
 			\item  Loc is a set of program locations
-			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$, $\ell, \ell' \in Loc$
+			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$ with $\ell, \ell' \in Loc$
 			\item $\ell_{init} \in Loc$ is the initial location
 			\item $\ell_E \subseteq Loc$ a set of error locations
-			\item st: $\Delta \rightarrow TF$ is a labeling function that assigns each transition in $\Delta$ a transformula.
+			\item st: $\Delta \rightarrow \psi$ is a labeling function that assigns each transition in $\Delta$ a transformula.
 		\end{itemize}
 	\end{mydef} \noindent
 	 %
@@ -206,10 +206,11 @@ urlcolor=g1          % color of external links
 	To illustrate these definitions we will present two examples.
 	
 	\medskip
-	\jw{How to do this transition beautifully? Just writing $TF_0$ alone is confusing.}
+
 	\subsection*{Example 1:}
+	\jw{Program code}
 	Assume we are given a program that is represented by CFG $G_0$ \\ $G_0 = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
-	\mapsto TF_0))$
+	\mapsto \psi_0))$
 	\begin{figure}[h]
 		\centering
 		\begin{tikzpicture}[%
@@ -223,7 +224,19 @@ urlcolor=g1          % color of external links
 		
 		\node[state] (2) [below of=1] {$\ell_1$};
 
-		\path (1) edge node {$TF_0:$ \\ $x := 0;$ \\ $y := 0$} (2)
+				\path (1) edge node {%
+			$
+			\psi_0 := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+			\end{array}
+			\right.
+			$ %
+		} (2)
 		;
 		
 		
@@ -232,19 +245,19 @@ urlcolor=g1          % color of external links
 		\caption{CFG $G_0$.}
 	\end{figure}
 	
-	Where $TF_0 = (\invars_0, \outvars_0, \auxvars_0, \varphi_0, \hat{\varphi}_0)$ is a transformula consisting of: 
+	Where $\psi_0 = (\invars_0, \outvars_0, \auxvars_0, \varphi_0, \widehat{\varphi}_0)$ is a transformula consisting of: 
 	\begin{itemize}
-		\item $\invars_0 = \{\ \}$. There are no in-variables because $\varphi_0$ does not depend on any variables. It only assigns the out-vars to 0.
-		\item $\outvars_0 = \{ \underbrace{x}_{PV} \mapsto \underbrace{x_{out}^0}_{TV}, y \mapsto y_{out}^0\}$
-		\item $\auxvars_0 = \{ \ \} $
-		\item $\varphi_0: (x_{out}^0 = 0 \land y_{out}^0 = 0)$
-		\item $\hat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of PV $x$ and $y$.
+		\item $\invars_0 = \emptyset$. There are no in-variables because $\varphi_0$ does not depend on any variables. It only assigns the out-vars to 0.
+		\item $\outvars_0 = \{ x \mapsto x_0, y \mapsto y_0\}$
+		\item $\auxvars_0 = \emptyset$
+		\item $\varphi_0: (x_0 = 0 \land y_0 = 0)$
+		\item $\widehat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of PV $x$ and $y$.
 	\end{itemize}
 	
 	
 	\subsection*{Example 2:}
 	Assume we are given a program that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
-	\mapsto TF_1))$
+	\mapsto \psi_1))$
 	\begin{figure}[H]
 		\centering
 		\begin{tikzpicture}[%
@@ -259,19 +272,19 @@ urlcolor=g1          % color of external links
 		\node[state] (2) [below of=1] {$\ell_2$};
 		
 		\path (1) edge node {%
-         \[
-    \psi := \left\{
+         $
+    \psi_1 := \left\{
     \begin{array}{lcl}
-		\invars       & = & \{x \mapsto x_{0}, y \mapsto y_{0} \} \\
-		\outvars      & = & \{ x \mapsto x_{1} , y \mapsto y_{1} \} \\
+		\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
+		\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
         \auxvars      & = & \emptyset \\
-		\varphi       & = & x_{1} = x_{0} + 1 \; \land \; y_{1} = x_{1} + y_{0} \\
-		\hat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
+		\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+		\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
     \end{array}
     \right.
-    \]%
+    $ %
         } (2)
-		;
+   		 ;
 		
 		
 		);
@@ -279,18 +292,18 @@ urlcolor=g1          % color of external links
 		\caption{CFG $G_1$.}
 	\end{figure}
 
-	Where $TF_1 = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \hat{\varphi}_1)$ is a transformula consisting of: 
+	Where $\psi = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \widehat{\varphi}_1)$ is a transformula consisting of: 
 	\begin{itemize}
-		\item $\invars_1 = \{x \mapsto x_{in}^1, y \mapsto y_{in}^1 \}$.
-		\item $\outvars_1 = \{ x \mapsto x_{out}^1, y \mapsto y_{out}^1 \}$
-		\item $\auxvars_1 = \{x_{aux}^1 \} $
-		\item $\varphi_1: (x_{aux}^1 = x_{in}^1 + 1 \land y_{out}^1 = x_{aux}^1 + y_{in}^1 \land x_{out}^1 = x_{aux}^1)$
-		\item $\hat{\varphi_1}: (c_{aux} = c_x + 1 \land c_y' = c_{aux} + c_y \land c_x' = c_{aux})$ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of PV $x$ and $y$. $c_{aux}$ is a new constant created for the aux-var $x_{aux}$.
+		\item $\invars_1 = \{x \mapsto x_1, y \mapsto y_1 \}$.
+		\item $\outvars_1 = \{ x \mapsto x_2, y \mapsto y_2 \}$
+		\item $\auxvars_1 = \emptyset $
+		\item $	\varphi = ( x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} ) $
+		\item $\widehat{\varphi} = ( c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y ) $ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of $x$ and $y$.
 	\end{itemize}
     
 	
 	\subsection*{Example 3:}
-	If we take both previous example and concatenate them to one CFG, we get \\ $CFG_{1+2} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto TF_0, (\ell_1, \ell_2) \mapsto TF_1))$.
+	If we take both previous example and combine them to one CFG, we get \\ $CFG_{0+1} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_1))$.
 		\begin{figure}[H]
 		\centering
 		\begin{tikzpicture}[%
@@ -307,65 +320,138 @@ urlcolor=g1          % color of external links
 		\node[state] (3) [below of=2] {$\ell_2$};
 		
 		
-		\path (1) edge node {$TF_0:$ \\ $x := 0;$ \\ $y := 0$} (2);
-		\path (2) edge node {$TF_1:$ \\ $x := x + 1;$ \\ $y := x + y$} (3);
-		
-		
-		);
+		\path (1) edge node {%
+		$
+		\psi_0 := \left\{
+		\begin{array}{lcl}
+		\invars       & = & \emptyset \\
+		\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+		\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+		\end{array}
+		\right.
+		$ %
+		} (2)
+		;
+		\path (2) edge node {%
+		$
+		\psi_1 := \left\{
+		\begin{array}{lcl}
+		\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
+		\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+		\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
+		\end{array}
+		\right.
+		$ %
+	} (3)
+	;
 		\end{tikzpicture}
-		\caption{CFG $G_{1 + 2}$.}
+		\caption{CFG $G_{0+1}$.}
 	\end{figure}
-	Where $TF_0$ and $TF_1$ are the same as before. \\
-	We see $CFG_{1+2}$ contains two TFs. For reachability analysis we can get a single formula describing the whole program by concatenating those two formulas:
-	$TF_2 = TF_0 \circ TF_1$ \\
+	We see $CFG_{0+1}$ contains two TFs. We can get a single formula describing the whole program by concatenating those two formulas:
+	$\psi_2 = \psi_0 \circ \psi_1$ \\
 	
 	\begin{mydef}
 		A concatenation of two Transformulas 
 		\begin{equation*}
-		TF_{1 \circ 2} = TF_1 \circ TF_2 = (\invars_{1 \circ 2}, \outvars_{1 \circ 2}, \auxvars_{1 \circ 2}, \varphi_{1 \circ 2}, \hat{\varphi}_{1 \circ 2})
-		\end{equation*}  yields one Transformula describing the behaviour of all of them. Where \\
-		\jwl{Are in vars fresh?}
+		\psi_{1 \circ 2} = \psi_1 \circ \psi_2 = (\invars_{1 \circ 2}, \outvars_{1 \circ 2}, \auxvars_{1 \circ 2}, \varphi_{1 \circ 2}, \widehat{\varphi}_{1 \circ 2})
+		\end{equation*}  yields one Transformula describing the behaviour of both of them. With
 		\begin{itemize}
 			\item $\invars_{1 \circ 2} = \invars_1$
-			\item $\outvars_{1 \circ 2} = \{ (PV, x_{out}^{fresh}) | (PV, x_{out}^{2}) \in \outvars_2 \text{ where } x_{out}^{fresh} \text{is a fresh termvariable of } x_{out}^2 \}$.
-			\item $\auxvars_{1 \circ 2} = \{ v' | v \in \auxvars_1 \cup \auxvars_1 \cup range(\invars_2) \text{ where v' is a fresh variable of v} \}$
-			\item $\varphi_{1 \circ 2}$ is the conjunction of $\varphi_1$ in which we replace every $(x, x_i) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
-			\item $\hat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable. For every every $v \in \auxvars_{1 \circ 2}$ we introduce a new constant.
+			\item For $\outvars_{1 \circ 2}$ we have to distinguish three cases cases: 
+			\jw{is the case where var is not changed in either TF important?}
+			\begin{itemize}
+				
+				\item[I:] $(x \mapsto x_i) \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out variable of the concatenation is the same as the out variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i)$ 
+				\item[II:] $(x \mapsto x_j) \in Out_2$ and $x  \not\in entries(Out_1)$, meaning program variable is solely modified in $\psi_2$. In that case the out variable of the concatenation is the same as the out variable of $\psi_2: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_j)$ 
+				\item[III:] $x \in entries(Out_1)$ and $x \in entries(Out_2)$, meaning program variable $x$ is modified in both transformulas which can create a term variable naming conflict. 
+				In this case $\outvars_{1 \circ 2} \cup (x \mapsto \widehat{x_j})$ where $\widehat{x_j}$ is a fresh term variable that has not been used before.
+				
+			\end{itemize}
+
+			\item $\auxvars_{1 \circ 2} = \{ \widehat{v_i} \ |\ v_i \in \auxvars_1 \cup \auxvars_2 \cup range(\invars_2) \text{ where } \widehat{v_i} \text{ is a fresh variable of } v_i \}$
+			\item $\varphi_{1 \circ 2}$ = $\varphi_1[x_i / x_j, v_i / \widehat{v_i} ] \land \varphi_2[v_j / \widehat{v_j}, x_j / \widehat{x_j}]$, where
+			 \begin{itemize}
+				\item $\varphi_1[x_i / x_j, v_i / \widehat{v_i} ] $ is $\varphi_1$ where we substitute every program variable mapping $(x \mapsto x_i) \in \outvars_1$ with $(x \mapsto x_j) \in \invars_2$ and each $v_i \in \auxvars_1$ with a fresh variable $\widehat{v_i}$.
+				\item  $\varphi_2[v_j / \widehat{v_j}, x_j / \widehat{x_j}]$ is $\varphi_2$ where we substitute each $v_j \in \auxvars_2$ with a fresh variable $\widehat{v_j}$ and each mapping $(x \mapsto x_j) \in \outvars_2$, that fulfills out-variable case $III$, with $(x \mapsto \widehat{x_j})$.
+			\end{itemize} 
+			
+			%is the conjunction of $\varphi_1$ in which we replace every $(x, x_i) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ %and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
+			\item $\widehat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant. For every every $v \in \auxvars_{1 \circ 2}$ we introduce a fresh constant.
 		\end{itemize}
 	\end{mydef}
-		
+
 	\smallskip
-	
-	Using this definition, $TF_2 = TF_0 \circ TF_1$ with
+	Using this definition we get $\psi_2 = \psi_0 \circ \psi_1$ with
 	\begin{itemize}
-		\item $\invars_2 = \invars_0 = \{ \ \}$
-		\item $\outvars_2 = \{ x \mapsto \underbrace{x_{out}^2}_{\text{fresh termvariable of } x_{out}^1}, y \mapsto y_{out}^2\}$
-		\item $\auxvars_2 = \{ x^2_{aux}, x_{in}^1, y_{in}^1 \} $
-		\item $\varphi_2 = (x_{in}^1 = 0 \land y_{in}^1 = 0 \land x_{aux}^2 = x_{in}^1 + 1 \land y_{out}^2 = x_{out}^2 + y_{in}^1 \land x_{aux}^2 = x_{out}^2)$
-		\item $\hat{\varphi_2} = (c_0 = 0 \land c_1 = 0 \land c_2 = c_0 + 1 \land c'_y = c_2 + c_2 \land c'_x = c_2)$ \\ We generated new constants for each aux-var: \\
-		$x_{in}^1 \mapsto c_0, y_{in}^1 \mapsto c_1, x^2_{aux} \mapsto c_2$
+		\item $\invars_2 = \invars_0 = \emptyset$
+		\item $\outvars_2 = \{ x \mapsto x_3, y \mapsto y_3 \}$ \\ where $x_3$ and $y_3$ are new term variables because $x$ and $y$ are changed in both $\psi_0$ and $\psi_1$.
+		\item $\auxvars_2 = \{x_1, y_1 \} $
+		\item $\varphi_2 = (x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1)$
+		\item $\widehat{\varphi_2} = (c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2)$ \\ We generated new constants for each aux-var: \\
+		$x_1 \mapsto c_1, y_1 \mapsto c_2$
 	\end{itemize}
-
-	\bigskip\bigskip\bigskip\noindent
-	Because we want to deal with programs that consist of more than one procedure, we first need to define three classes of program transitions.
+	With this concatenation we can reduce $CFG_{0+1}$ from three locations and two TFs to two locations and only one TF $\psi_2$: \\
 	
+	\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=3cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$\ell_0$};
+		
+		\node[state] (2) [below of=1] {$\ell_2$};
+		
+		\path (1) edge node {%
+			$
+			\psi_2 := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \{ x \mapsto x_3, y \mapsto y_3 \} \\
+			\auxvars      & = &  \{x_1, y_1 \} \\
+			\varphi       & = & (x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1) \\
+			\widehat{\varphi} & = & (c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2) \\
+			\end{array}
+			\right.
+			$ %
+		} (2)
+		;
+		
+		
+		);
+		\end{tikzpicture}
+		\caption{Reduced CFG $G_{0+1}$.}
+	\end{figure}
 
+	\subsection{Interprocedual Control Flow Graphs}
 	
-	\begin{mydef} In interprocedual programs we find three distinct classes of program transitions:
+	We want to be able to handle programs that consist of procedures that call other procedures, so called interprocedual programs, for that we need to modify our definitions from the previous chapter.
+	
+	\begin{mydef}
+		An interprocedual control flow graph (ICFG) is a tuple \\$IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$ where $Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, and st have the same definition as in regular CFGs. $proc$ is a set of different procedures in the program. 
+		%where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being %able to represent programs that have more than one procedure as well.
+	\end{mydef}
+	What is special about transitions in ICFGs is that they can lead to different procedures:
+	\begin{mydef} Assume we are given an ICFG $IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$, we find three distinct classes of program transitions in $Delta$:
 		\begin{itemize}
 			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. 
 			
-			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure p in a program has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q$.
+			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \jw{has localvar assignment, todo tomorrow}
 			
-			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q$ and $\ell'$ is a location of caller procedure $p$. Each return has a corresponding call.
+			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. Each return has a corresponding call.
 		\end{itemize}
 	\end{mydef}
 \jw{explain the formulas}
 	 \bigskip\noindent
 	Considering these program transitions we need to modify our definition of a CFG to get Interprocedual Control Flow Graphs. As CFGs only deal with internal transitions.
-	\begin{mydef}
-		An interprocedual control flow graph (ICFG) is a CFG G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being able to represent programs that have more than one procedure as well.
-	\end{mydef}
+
 	
 	\jwl{Extend TF definition with predProc and succProc}
 	\jw{\textbf{@ToDo extend example by procedure call}} 
@@ -439,8 +525,6 @@ urlcolor=g1          % color of external links
 	is satisfiable. Here $F_{i-1, \ell_{pre}}$ is the frame of a previous iteration, $T_{\ell_{pre} \rightarrow \ell}$ is the transformula $st(\ell_{pre}, \ell)$ and $t'$ is the primed proof-obligation.
 	Our implementation treats the frame as a precondition, the proof-obligation as a post condition and the transformula as a possible transition between. Now to check the satisfiability we use the closed formula of the precondition
 	
-
-	\jw{Here comes the renaming stuff for Call and Return}
 	\section{Using Interpolants}
 	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
 	\begin{equation}
