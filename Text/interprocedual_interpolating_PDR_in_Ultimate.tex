@@ -153,7 +153,7 @@ urlcolor=g1          % color of external links
 		\begin{itemize}
 			\item A label $proc$ that assigns the name of the corresponding procedure in which the program variable occurs. 
 			%If the program variable is a global variable, $proc = null$
-			\item A termvariable (TV) $x_0$ that is used in term operations and SMT calls.
+			\item A termvariable (TV) $x_i$ that is used in term operations and SMT calls.
 			\item A constant $c_x$
 			\item A primed constant $c_x'$
 		\end{itemize}
@@ -179,11 +179,11 @@ urlcolor=g1          % color of external links
     \begin{mydef}
         A transformula (TF) is a tuple $\psi = (\invars, \outvars, \auxvars, \tf, \ctf)$ with 
         \begin{itemize}
-          \item $\invars : PV \rightarrow TV$ is a mapping from program variables to unprimed termvariables called the in-variables
-          \item $\outvars : PV \rightarrow TV$ is a mapping from program variables to primed termvariables called the out-variables
-          \item $\auxvars \subseteq TV$ is a set of termvariables that only exist in the context of this transformula called the aux-variables,
+          \item $\invars : x \rightarrow x_i$ is a mapping from program variables to unprimed termvariables called the in-variables
+          \item $\outvars : x \rightarrow x_i'$ is a mapping from program variables to primed termvariables called the out-variables
+          \item $\auxvars: \{ v_i \}$ is a set of termvariables $v_i$ that only exist in the context of this transformula called the aux-variables,
           \item $\tf$ is a formula over termvariables from $\invars$, $\outvars$, and $\auxvars$. The actual transformula.
-          \item $\ctf$ is the closed formula of $\tf$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable.
+          \item $\ctf$ is the closed formula of $\tf$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant of the corresponding program variable. For every aux-var there is a newly created constant.
           %\item $PreProc$ is the procedure in which the program is before executing the TF.
           %\item $SuccProc$ is the procedure the program is in after executing the TF.
         \end{itemize}
@@ -197,7 +197,7 @@ urlcolor=g1          % color of external links
 			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$ with $\ell, \ell' \in Loc$
 			\item $\ell_{init} \in Loc$ is the initial location
 			\item $\ell_E \subseteq Loc$ a set of error locations
-			\item st: $\Delta \rightarrow \psi$ is a labeling function that assigns each transition in $\Delta$ a transformula.
+			\item st: $\Delta \rightarrow \psi$ is a labeling function that assigns each transition in $\Delta$ a transformula $\psi$.
 		\end{itemize}
 	\end{mydef} \noindent
 	 %
@@ -418,8 +418,8 @@ urlcolor=g1          % color of external links
 			\jw{is the case where var is not changed in either TF important?}
 			\begin{itemize}
 				
-				\item[I:] $(x \mapsto x_i) \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out variable of the concatenation is the same as the out variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i)$ 
-				\item[II:] $(x \mapsto x_j) \in Out_2$ and $x  \not\in entries(Out_1)$, meaning program variable is solely modified in $\psi_2$. In that case the out variable of the concatenation is the same as the out variable of $\psi_2: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_j)$ 
+				\item[I:] $(x \mapsto x_i) \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i)$ 
+				\item[II:] $(x \mapsto x_j) \in Out_2$ and $x  \not\in entries(Out_1)$, meaning program variable is solely modified in $\psi_2$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_2: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_j)$ 
 				\item[III:] $x \in entries(Out_1)$ and $x \in entries(Out_2)$, meaning program variable $x$ is modified in both transformulas which can create a term variable naming conflict. 
 				In this case $\outvars_{1 \circ 2} \cup (x \mapsto \widehat{x_j})$ where $\widehat{x_j}$ is a fresh term variable that has not been used before.
 				
@@ -433,7 +433,7 @@ urlcolor=g1          % color of external links
 			\end{itemize} 
 			
 			%is the conjunction of $\varphi_1$ in which we replace every $(x, x_i) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ %and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
-			\item $\widehat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant. For every every $v \in \auxvars_{1 \circ 2}$ we introduce a fresh constant.
+			\item $\widehat{\varphi}_{1 \circ 2}$ is the closed formula of $\varphi_{1 \circ 2}$ where every in-variable is replaced by the unprimed constant of the corresponding program variable and every out-variable is replaced by the primed constant. For every every $v_i \in \auxvars_{1 \circ 2}$ we introduce a fresh constant.
 		\end{itemize}
 	\end{mydef}
 
@@ -488,7 +488,7 @@ urlcolor=g1          % color of external links
 	We want to be able to handle programs that consist of procedures that call other procedures, so called interprocedual programs, for that we need to modify our definitions from the previous chapter.
 	
 	\begin{mydef}
-		An interprocedual control flow graph (ICFG) is a tuple \\$IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$ where $Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, and st have the same definition as in regular CFGs. $proc$ is a set of different procedures in the program. 
+		An interprocedual control flow graph (ICFG) is a tuple \\$IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$ where $Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, and st have the same definition as in regular CFGs. $proc$ is a set of different procedures found in the program. 
 		%where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being %able to represent programs that have more than one procedure as well.
 	\end{mydef}
 	What is special about transitions in ICFGs is that they can lead to different procedures:
