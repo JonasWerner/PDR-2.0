@@ -208,89 +208,118 @@ urlcolor=g1          % color of external links
 	\medskip
 
 	\subsection*{Example 1:}
-	\jw{Program code}
-	Assume we are given a program that is represented by CFG $G_0$ \\ $G_0 = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
+	Assume we are given program $P_0$ that is represented by CFG $G_0$ \\ $G_0 = (\{ \ell_0, \ell_1 \}, \{ (\ell_0, \ell_1)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) 
 	\mapsto \psi_0))$
-	\begin{figure}[h]
-		\centering
-		\begin{tikzpicture}[%
-		->,
-		>=stealth', shorten >=1pt, auto,
-		node distance=3cm, scale=1, 
-		transform shape, align=center,    
-		smallnode/.style={inner sep=1.4}
-		]
-		\node[state](1){$\ell_0$};
-		
-		\node[state] (2) [below of=1] {$\ell_1$};
 
+		\begin{minipage}{.3\textwidth}
+			\centering
+			\begin{align*}
+				&\texttt{x, y : int}; \\
+				&\texttt{x := 0}; \\
+				&\texttt{y := 0;}
+			\end{align*}
+			
+			\captionof{figure}{Program $P_0$}
+			\label{fig:square}
+		\end{minipage}%
+		\hfill
+		\begin{minipage}{.6\textwidth}
+			\centering
+		\begin{tikzpicture}[%
+				->,
+				>=stealth', shorten >=1pt, auto,
+				node distance=3cm, scale=1, 
+				transform shape, align=center,    
+				smallnode/.style={inner sep=1.4}
+				]
+				\node[state](1){$\ell_0$};
+				
+				\node[state] (2) [below of=1] {$\ell_1$};
+				
 				\path (1) edge node {%
-			$
-			\psi_0 := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \emptyset \\
-			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
-			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
-			\end{array}
-			\right.
-			$ %
-		} (2)
-		;
-		
-		
-		);
-		\end{tikzpicture}
-		\caption{CFG $G_0$.}
-	\end{figure}
-	
+					$
+					\psi_0 := \left\{
+					\begin{array}{lcl}
+					\invars       & = & \emptyset \\
+					\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+					\auxvars      & = & \emptyset \\
+					\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+					\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+					\end{array}
+					\right.
+					$ %
+				} (2)
+				;
+
+				);
+				\end{tikzpicture}
+							\captionof{figure}{$G_0$}
+			\label{fig:rect}
+		\end{minipage}%
+	\bigskip
+
 	Where $\psi_0 = (\invars_0, \outvars_0, \auxvars_0, \varphi_0, \widehat{\varphi}_0)$ is a transformula consisting of: 
 	\begin{itemize}
 		\item $\invars_0 = \emptyset$. There are no in-variables because $\varphi_0$ does not depend on any variables. It only assigns the out-vars to 0.
 		\item $\outvars_0 = \{ x \mapsto x_0, y \mapsto y_0\}$
 		\item $\auxvars_0 = \emptyset$
 		\item $\varphi_0: (x_0 = 0 \land y_0 = 0)$
-		\item $\widehat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of PV $x$ and $y$.
+		\item $\widehat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of $x$ and $y$.
 	\end{itemize}
 	
 	
 	\subsection*{Example 2:}
 	Assume we are given a program that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
 	\mapsto \psi_1))$
-	\begin{figure}[H]
-		\centering
+
+		\begin{minipage}{.3\textwidth}
+			\centering
+			\begin{align*}
+				&\texttt{x, y : int}; \\
+				&\texttt{x := x + 1}; \\
+				&\texttt{y := y + 1;}
+			\end{align*}
+
+			
+			\captionof{figure}{Program $P_1$}
+			\label{fig:square}
+		\end{minipage}%
+		\hfill
+		\begin{minipage}{.6\textwidth}
+			\centering
 		\begin{tikzpicture}[%
-		->,
-		>=stealth', shorten >=1pt, auto,
-		node distance=3cm, scale=1, 
-		transform shape, align=center,    
-		smallnode/.style={inner sep=1.4}
-		]
-		\node[state](1){$\ell_1$};
-		
-		\node[state] (2) [below of=1] {$\ell_2$};
-		
-		\path (1) edge node {%
-         $
-    \psi_1 := \left\{
-    \begin{array}{lcl}
-		\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
-		\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
-        \auxvars      & = & \emptyset \\
-		\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
-		\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
-    \end{array}
-    \right.
-    $ %
-        } (2)
-   		 ;
-		
-		
-		);
-		\end{tikzpicture}
-		\caption{CFG $G_1$.}
-	\end{figure}
+					->,
+					>=stealth', shorten >=1pt, auto,
+					node distance=3cm, scale=1, 
+					transform shape, align=center,    
+					smallnode/.style={inner sep=1.4}
+					]
+					\node[state](1){$\ell_1$};
+					
+					\node[state] (2) [below of=1] {$\ell_2$};
+					
+					\path (1) edge node {%
+						$
+						\psi_1 := \left\{
+						\begin{array}{lcl}
+						\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
+						\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
+						\auxvars      & = & \emptyset \\
+						\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+						\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
+						\end{array}
+						\right.
+						$ %
+					} (2)
+					;
+					
+					
+					);
+					\end{tikzpicture}
+			\captionof{figure}{$G_1$}
+			\label{fig:rect}
+		\end{minipage}%
+\bigskip
 
 	Where $\psi = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \widehat{\varphi}_1)$ is a transformula consisting of: 
 	\begin{itemize}
@@ -304,53 +333,73 @@ urlcolor=g1          % color of external links
 	
 	\subsection*{Example 3:}
 	If we take both previous example and combine them to one CFG, we get \\ $CFG_{0+1} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_1))$.
-		\begin{figure}[H]
+
+			\begin{minipage}{.3\textwidth}
+		\centering
+		\begin{align*}
+			&\texttt{x, y : int}; \\
+			&\texttt{x := 0}; \\
+			&\texttt{y := 0;} \\
+			&\texttt{x := x + 1}; \\
+			&\texttt{y := y + 1;}
+		\end{align*}
+
+		
+		
+		\captionof{figure}{Program $P_{0+1}$}
+		\label{fig:square}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.6\textwidth}
 		\centering
 		\begin{tikzpicture}[%
-		->,
-		>=stealth', shorten >=1pt, auto,
-		node distance=3cm, scale=1, 
-		transform shape, align=center,    
-		smallnode/.style={inner sep=1.4}
-		]
-		\node[state](1){$\ell_0$};
-		
-		\node[state] (2) [below of=1] {$\ell_1$};
-		
-		\node[state] (3) [below of=2] {$\ell_2$};
-		
-		
-		\path (1) edge node {%
-		$
-		\psi_0 := \left\{
-		\begin{array}{lcl}
-		\invars       & = & \emptyset \\
-		\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
-		\auxvars      & = & \emptyset \\
-		\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
-		\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
-		\end{array}
-		\right.
-		$ %
-		} (2)
-		;
-		\path (2) edge node {%
-		$
-		\psi_1 := \left\{
-		\begin{array}{lcl}
-		\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
-		\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
-		\auxvars      & = & \emptyset \\
-		\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
-		\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
-		\end{array}
-		\right.
-		$ %
-	} (3)
-	;
-		\end{tikzpicture}
-		\caption{CFG $G_{0+1}$.}
-	\end{figure}
+					->,
+					>=stealth', shorten >=1pt, auto,
+					node distance=3cm, scale=1, 
+					transform shape, align=center,    
+					smallnode/.style={inner sep=1.4}
+					]
+					\node[state](1){$\ell_0$};
+					
+					\node[state] (2) [below of=1] {$\ell_1$};
+					
+					\node[state] (3) [below of=2] {$\ell_2$};
+					
+					
+					\path (1) edge node {%
+						$
+						\psi_0 := \left\{
+						\begin{array}{lcl}
+						\invars       & = & \emptyset \\
+						\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+						\auxvars      & = & \emptyset \\
+						\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+						\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+						\end{array}
+						\right.
+						$ %
+					} (2)
+					;
+					\path (2) edge node {%
+						$
+						\psi_1 := \left\{
+						\begin{array}{lcl}
+						\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
+						\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
+						\auxvars      & = & \emptyset \\
+						\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+						\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
+						\end{array}
+						\right.
+						$ %
+					} (3)
+					;
+					\end{tikzpicture}
+		\captionof{figure}{$G_{0+1}$}
+		\label{fig:rect}
+	\end{minipage}%
+
+
 	We see $CFG_{0+1}$ contains two TFs. We can get a single formula describing the whole program by concatenating those two formulas:
 	$\psi_2 = \psi_0 \circ \psi_1$ \\
 	
@@ -439,24 +488,30 @@ urlcolor=g1          % color of external links
 		%where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being %able to represent programs that have more than one procedure as well.
 	\end{mydef}
 	What is special about transitions in ICFGs is that they can lead to different procedures:
-	\begin{mydef} Assume we are given an ICFG $IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$, we find three distinct classes of program transitions in $Delta$:
+	\begin{mydef} Assume we are given an ICFG $IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$, we find three distinct classes of program transitions in $\Delta$:
 		\begin{itemize}
-			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. 
+			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. $st(\ell, \ell')$ is a transformula describing the change in variables.
 			
-			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \jw{has localvar assignment, todo tomorrow}
+			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas, $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
+			\begin{itemize}
+				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the called procedure $q$. $\psi_{old}$ is a conjunction of assignments of each of those $g_i$ to a fresh variable $old_{i}$. This saves the values of the global variables before executing the $q$. 
+				\item $\psi_{global}$ is a transformula describing the how $q$ changes the global variables.
+				\item $\psi_{local}$ is a transfomula describing how the local variables, the variables that are only used in the scope of $q$, are modified.
+			\end{itemize}
 			
-			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. Each return has a corresponding call.
+			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. There is a map that maps each return to its corresponding call. \\
+			$st(\ell, \ell')$ consists of two transformulas, $\psi_{ass}$ and $\psi_{local}$: 
+			\begin{itemize}
+				\item $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
+				\item $\psi_{local}$ is the same transformula as the $\psi_{local}$ of the corresponding call statement, that describe how the local variables of $q$ are modified.
+			\end{itemize}
 		\end{itemize}
 	\end{mydef}
-\jw{explain the formulas}
-	 \bigskip\noindent
-	Considering these program transitions we need to modify our definition of a CFG to get Interprocedual Control Flow Graphs. As CFGs only deal with internal transitions.
 
+	\jw{If we have those TFs for procedures we do not have to look at the internal transitions of the procedure itself? \\ Can we concatenate these formulas like above? \\ Aren't these formulas acting like summaries of the procedure? \\ How are these formulas used in the context of the calling procedure? \\
+	Do we need $\psi_{local}$ at all, we are not interested in local variable changes in a called procedure?}
 	
-	\jwl{Extend TF definition with predProc and succProc}
-	\jw{\textbf{@ToDo extend example by procedure call}} 
-	We see that foo calls bar during its run. Our current definition of CFGs do not support those calls yet, we need to expand it to deal with programs containing multiple procedures.
-	
+	\jw{ToDo ICFG elaborate ICFG example}
 	
 	\pagebreak
 		
