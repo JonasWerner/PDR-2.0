@@ -334,7 +334,7 @@ urlcolor=g1          % color of external links
     
 	
 	\subsection*{Example 3:}
-	If we take both previous example and combine them to one CFG, we get \\ $CFG_{0+1} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_1))$.
+	If we take both previous example and combine them to one CFG, we get \\ $G_{0+1} = (\{ \ell_0, \ell_1, \ell_2\}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_1))$.
 	
 	\bigskip
 
@@ -496,26 +496,22 @@ urlcolor=g1          % color of external links
 		\begin{itemize}
 			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. $st(\ell, \ell')$ is a transformula describing the change in variables.
 			
-			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas, $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
+			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas that function as a connection between $p$ and $q$, $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
 			\begin{itemize}
-				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the called procedure $q$. $\psi_{old}$ is a conjunction of assignments of each of those $g_i$ to a fresh variable $old_{i}$. This saves the values of the global variables before executing the $q$. 
-				\item $\psi_{global}$ is a transformula describing the how $q$ changes the global variables.
-				\item $\psi_{local}$ is a transfomula describing how the local variables, the variables that are only used in the scope of $q$, are modified.
+				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the $q$. $\psi_{old}$ is a conjunction of assignments of each of those $g_i$ to a fresh variable $old_{i}$. 
+				\item $\psi_{global}$ is a reverse transformula of $\psi_{old}$ assigning the old variables back to its global counterparts.
+ $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
 			\end{itemize}
 			
 			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. There is a map that maps each return to its corresponding call. \\
 			$st(\ell, \ell')$ consists of two transformulas, $\psi_{ass}$ and $\psi_{local}$: 
 			\begin{itemize}
 				\item $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
-				\item $\psi_{local}$ is the same transformula as the $\psi_{local}$ of the corresponding call statement, that describe how the local variables of $q$ are modified.
 			\end{itemize}
 		\end{itemize}
 	\end{mydef}
-
-	\jw{If we have those TFs for procedures we do not have to look at the internal transitions of the procedure itself? \\ Can we concatenate these formulas like above? \\ Aren't these formulas acting like summaries of the procedure? \\ How are these formulas used in the context of the calling procedure? \\
-	Do we need $\psi_{local}$ at all, we are not interested in local variable changes in a called procedure?}
 	
-	\jw{ToDo ICFG elaborate ICFG example}
+	\jw{Do ICFG Example}
 	
 	\pagebreak
 		
@@ -545,7 +541,7 @@ urlcolor=g1          % color of external links
 	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
 	
 	\subsection{PDR for Software}
-	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we divised a way of using it on software, this approach was based on the technique described by Lange et al. \cite{DBLP:conf/fmcad/0001NN15}
+	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we proposed a way of using it on software, this approach was based on the technique described by Lange et al. \cite{DBLP:conf/fmcad/0001NN15}
 	Instead of unrolling the transition relation of a given program's CFG like other verification techniques PDR checks only local transitions in a backwards-search like manner.
 	\smallskip
 	To check correctness of a program PDR uses an array of frames for each program location $\ell \in Loc$. 
@@ -575,14 +571,225 @@ urlcolor=g1          % color of external links
 		A fixpoint in the frames is a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$. If there is such a fixpoint then the given program is safe.
 	\end{mydef}
 	If there is neither a proof-obligation on level 0 or a fixpoint in the frames, PDR starts a new iteration.
-
-	\subsection{SMT-queries}
-	As mentioned before, PDR constructs queries to an SMT-solver in the blocking-phase, those are conjunctions of three predicates. Given proof-obligation $po = (t, \ell, i)$ the algorithm checks for each predecessor location of $\ell$ $\ell_{pre}$ if the formula:
+	
+	\bigskip
+	
+	\jw{Rename details here to definitions used in this paper}
+	\subsection{Example}
+	To illustrate the functionality of our PDR library consider CFG \\ $ G = (\{\ell_0, \ell_1, \ell_2, \ell_E \}, \\ \{(\ell_0, \ell_1), (\ell_1, \ell_1), (\ell_1, \ell_2), (\ell_1, \ell_E) \}, \\ \ell_0, \ell_E, ( (\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_1) \mapsto \psi_1, (\ell_1, \ell_2) \mapsto \psi_2, (\ell_1, \ell_E) \mapsto \psi_E)$ \\
+	With Transformulas: \\
+	\begin{itemize}
+	\item $\psi_0$
+	\item $\psi_1$
+	\item $\psi_2$
+	\item $\psi_E$
+	\end{itemize}
+	
+	
+	
+	\begin{figure}[H]
+		\centering
+		\hspace*{3cm}
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=2cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node [state](1){$\ell_0$};
+		
+		\node[state] (2) [below of=1] {$\ell_1$};
+		
+		\node[state] (3) [below left of=2] {$\ell_2$};
+		
+		\node[state] (4) [below right of=2] {$\ell_E$};
+		
+		
+		
+		\path (1) edge node {$x' = 0 \land y' = x'$} (2)
+		(2) edge [loop right] node {$x' = x + 1 \land y' = y + 1$} (2)
+		(2) edge [edge label={$x = y$}, swap] node {} (3)
+		(2) edge [edge label={$x \neq y$}, swap] node {} (4)
+		;
+		
+		
+		);
+		\end{tikzpicture}
+		\caption{Graph of $\mathcal{B}$.}
+	\end{figure}
+	\label{ex1} 
+	
+	We now want to check whether $\ell_E$ is reachable, using the lifted algorithm: \par
+	
+	\textbf{1. Step: Check for 0-Counter-Example} \\
+	Is $\ell_0 = \ell_E$? \\
+	No, we continue with initializing level 0 by adding to each $\ell \in L \backslash \{\ell_0, \ell_E\}$ a new frame $F_{0, \ell} = false$, for $\ell_0$ adding $F_{0, \ell_0} = true$. \\ \\
+	
+	
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cc}
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 \\
+			\cmidrule{1-2}
+			$\ell_0$ & $true$ \\
+			$\ell_1$ & $false$ \\
+			$\ell_2$ & $false$ \\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+	
+	\hspace*{5cm}
+	
+	
+	\textbf{2. Step: Next Level} \\
+	We initialize new frames for level 1 as \texttt{true}: \\
+	
+	\begin{center}
+		\begin{tabu}{ccc}
+			\toprule
+			& \multicolumn{2}{c}{level} \\ 
+			\cmidrule(lr){2-3}
+			location & 0 & 1 \\
+			\cmidrule{1-3}
+			$\ell_0$ & $true$ & $true$ \\
+			$\ell_1$ & $false$ & $true$ \\
+			$\ell_2$ & $false$ & $true$ \\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+	
+	\hspace*{5cm}
+	
+	
+	We see there is only one transition leading to $\ell_E$, $(\ell_1, x \neq y, \ell_E)$. We get the initial proof-obligation $(x \neq y, \ell_1, 1)$. \\ \\ \par
+	\textbf{3. Step: First Blocking Phase} \\
+	To block the initial proof-obligation $(x \neq y, \ell_1, 1)$ we check each predecessor of $\ell_1$:
+	
+	\begin{itemize}
+		\item predecessor: $\ell_0$
+		\begin{equation*}
+		\underbrace{true}_{F_{0, \ell_0}} \land \underbrace{x' = 0 \land y' = x'}_{T_{\ell_0 \rightarrow \ell_1}} \land  x' \neq y'
+		\end{equation*}
+		Which is unsatisfiable, we add $\overline{(x \neq y)} \equiv x = y$ to $F_{0, \ell_1}$ and $F_{1, \ell_1}$: \\
+		
+		\begin{center}
+			\begin{tabu}{ccc}
+				\toprule
+				& \multicolumn{2}{c}{level} \\
+				\cmidrule(lr){2-3}
+				location & 0 & 1 \\
+				\cmidrule{1-3}
+				$\ell_0$ & $true$ & $true$ \\
+				$\ell_1$ & $false \land x = y$ & $true \land x = y$ \\
+				$\ell_2$ & $false$ & $true$ \\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+		
+		\hspace*{5cm}
+		
+		\item predecessor: $\ell_1$
+		\begin{equation*}
+		\underbrace{false \land x = y}_{F_{0, \ell_1}} \land \underbrace{x' = x + 1 \land y' = y + 1'}_{T_{\ell_1 \rightarrow \ell_1}} \land  x' \neq y'
+		\end{equation*}
+		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$ and $F_{1, \ell_1}$ we move on.
+		
+	\end{itemize}
+	As there are no proof-obligations left, we continue with the first propagation-phase. \\ \\ \par
+	
+	\textbf{4. Step: First Propagation-Phase} \\
+	Check if there exists a global fixpoint position $i$ where
 	\begin{equation*}
-	F_{i - 1, \ell_{pre}} \land T_{\ell_{pre} \rightarrow \ell} \land t'
+	F_{i-1, \ell} = F_{i, \ell}
 	\end{equation*}
-	is satisfiable. Here $F_{i-1, \ell_{pre}}$ is the frame of a previous iteration, $T_{\ell_{pre} \rightarrow \ell}$ is the transformula $st(\ell_{pre}, \ell)$ and $t'$ is the primed proof-obligation.
-	Our implementation treats the frame as a precondition, the proof-obligation as a post condition and the transformula as a possible transition between. Now to check the satisfiability we use the closed formula of the precondition
+	for every location $\ell \in L \backslash \{l_E \}$. \\
+	We see there is no such $i$, we continue with the next level. \\ \\ \par
+	
+	\textbf{5. Step: Next Level} \\
+	We initialize new frames for level 2 as \texttt{true}: \\
+	
+	\begin{center}
+		\begin{tabu}{cccc}
+			\toprule
+			& \multicolumn{3}{c}{level} \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2\\
+			\cmidrule{1-4}
+			$\ell_0$ & $true$ & $true$ & $true$ \\
+			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true$\\
+			$\ell_2$ & $false$ & $true$ & $true$ \\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+	
+	\hspace*{5cm}
+	
+	Again we generate the initial proof-obligation which is the same as before but on level 2 now, we have the initial proof-obligation $(x \neq y, \ell_1, 2).$ \\ \\ \par
+	
+	
+	\textbf{6. Step: Second Blocking Phase} \\
+	To block proof-obligation $(x \neq y, \ell_1, 2)$ we check the predecessors of $\ell_1$:
+	
+	\begin{itemize}
+		\item predecessor: $\ell_0$
+		\begin{equation*}
+		\underbrace{true}_{F_{1, \ell_0}} \land \underbrace{x' = 0 \land y' = x'}_{T_{\ell_0 \rightarrow \ell_1}} \land  x' \neq y'
+		\end{equation*}
+		Which is unsatisfiable, we add $\overline{(x \neq y)} \equiv x = y$ to $F_{0, \ell_1}$, $F_{1, \ell_1}$ and $F_{2, \ell_1}$:
+		
+		\begin{center}
+			\begin{tabu}{cccc}
+				\toprule
+				& \multicolumn{3}{c}{level} \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2\\
+				\cmidrule{1-4}
+				$\ell_0$ & $true$ & $true$ & $true$ \\
+				$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
+				$\ell_2$ & $false$ & $true$ & $true$ \\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+		
+		\hspace*{5cm}
+		
+		\item predecessor: $\ell_1$
+		\begin{equation*}
+		\underbrace{true \land x = y}_{F_{1, \ell_1}} \land \underbrace{x' = x + 1 \land y' = y + 1}_{T_{\ell_1 \rightarrow \ell_1}} \land  x' \neq y'
+		\end{equation*}
+		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$, $F_{1, \ell_1}$, and $F_{2, \ell_1}$ we move on.
+	\end{itemize}
+	
+	As there are no proof-obligations left, we continue with the second propagation-phase \\ \\ \par
+	
+	\textbf{7. Step: Second Propagation-Phase} \\
+	
+	\begin{center}
+		\begin{tabu}{cccc}
+			\toprule
+			& \multicolumn{3}{c}{level} \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2\\
+			\cmidrule{1-4}
+			$\ell_0$ & $true$ & $true$ & $true$ \\
+			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
+			$\ell_2$ & $false$ & $true$ & $true$ \\
+			\bottomrule
+			\multicolumn{1}{c}{} &  \multicolumn{1}{c}{} & \multicolumn{2}{c}{\upbracefill} \\[-1ex]
+			\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{2}{c}{$\scriptstyle global\ fixpoint$}\\
+		\end{tabu}
+	\end{center}
+	
+	\hspace*{5cm}
+	
+	We see that level 1 equals level 2 on all locations, with that we found global fixpoint position $i = 2$, the forumulas at that position are the inductive invariants proving that $\ell_E$ is not reachable.
+	
+	\section{Interprocedual PDR}
+	
 	
 	\section{Using Interpolants}
 	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
@@ -595,6 +802,8 @@ urlcolor=g1          % color of external links
 	for satisfiability. \\
 	Formula (3.1) is satisfiable until we get a proof-obligation on level 1, because frame $F_{\ell_1, 0}$ is always false. \\
 	Formula (3.2) is always unsatisfiable, in each level we add $x \neq 1$ to $\ell_1$'s frames. That formula however is not strong enough to block the chain of satisfiable obligations of (3.1) in the next level, which is inefficient.
+	
+	
 	
 	\section{Evaluation}
 	Run the benchmarks again and compare them to the ones from last year, where we will see (hopefully) a speedup.
