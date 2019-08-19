@@ -415,7 +415,6 @@ urlcolor=g1          % color of external links
 		\begin{itemize}
 			\item $\invars_{1 \circ 2} = \invars_1$
 			\item For $\outvars_{1 \circ 2}$ we have to distinguish three cases cases: 
-			\jw{is the case where var is not changed in either TF important?}
 			\begin{itemize}
 				
 				\item[I:] $(x \mapsto x_i) \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i)$ 
@@ -469,8 +468,8 @@ urlcolor=g1          % color of external links
 			\invars       & = & \emptyset \\
 			\outvars      & = & \{ x \mapsto x_3, y \mapsto y_3 \} \\
 			\auxvars      & = &  \{x_1, y_1 \} \\
-			\varphi       & = & (x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1) \\
-			\widehat{\varphi} & = & (c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2) \\
+			\varphi       & = & x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1 \\
+			\widehat{\varphi} & = & c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2 \\
 			\end{array}
 			\right.
 			$ %
@@ -496,23 +495,122 @@ urlcolor=g1          % color of external links
 		\begin{itemize}
 			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. $st(\ell, \ell')$ is a transformula describing the change in variables.
 			
-			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas that function as a connection between $p$ and $q$, $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
+			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas that function as a connection between $p$ and $q$, \\ $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
 			\begin{itemize}
 				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the $q$. $\psi_{old}$ is a conjunction of assignments of each of those $g_i$ to a fresh variable $old_{i}$. 
 				\item $\psi_{global}$ is a reverse transformula of $\psi_{old}$ assigning the old variables back to its global counterparts.
- $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
 			\end{itemize}
 			
 			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. There is a map that maps each return to its corresponding call. \\
-			$st(\ell, \ell')$ consists of two transformulas, $\psi_{ass}$ and $\psi_{local}$: 
+			$st(\ell, \ell')$ consists of two transformulas, $\psi_{ass}$: 
 			\begin{itemize}
 				\item $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
 			\end{itemize}
 		\end{itemize}
 	\end{mydef}
 	
-	\jw{Do ICFG Example}
+	Assume we are given program $P_2$ that is represented by ICFG $IG_0$ \\ $IG_0 = (\{ \ell_0, \ell_1,  \ell_2, \ell_3 \}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2), \\ (\ell_2,\ell_3), (\ell_3, \ell_4)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_{call}, (\ell_2, \ell_3) \mapsto \psi_1, (\ell_3, \ell_4) \mapsto \psi_{return}))$
 	
+	\bigskip
+	
+	\begin{minipage}{.3\textwidth}
+		\centering
+		\begin{align*}
+		&\texttt{x, y : int}; \\
+		&\texttt{x := 0}; \\
+		&\texttt{y := 0;} \\
+		&\texttt{call inc();} \\ \\
+		&\texttt{procedure inc() \{} \\
+		&\texttt{ \hspace*{1em} y:= y\ +\ 1;} \\
+		& \texttt{\}}
+		\end{align*}
+		
+		\captionof{figure}{Program $P_2$}
+		\label{fig:square}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.6\textwidth}
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=3cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$\ell_0$};
+		
+		\node[state] (2) [below of=1] {$\ell_1$};
+		
+		\node[state] (3) [below of=2] {$\ell_{2}$};
+		
+		\node[state] (4) [below of=3] {$\ell_{3}$};
+		
+		\node[state] (5) [below of=4] {$\ell_{4}$};
+		
+		\path (1) edge node {%
+			$
+			\psi_0 := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+			\end{array}
+			\right.
+			$ %
+		} (2)
+		;
+		\path (2)[densely dotted] edge node {%
+			$
+			\psi_{old} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{y \mapsto y_{in} \} \\
+			\outvars      & = & \{ y \mapsto y_{in}, \ y_{old_0} \mapsto y_{old_1} \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & y_{old_1} = y_{in} \\
+			\widehat{\varphi} & = & c_{y_{old}}' = c_{y} \\
+			\end{array}
+			\right.
+			$ %
+		} (3)
+	
+		;
+		\path (3) edge node {%
+			$
+			\psi_{1} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ y \mapsto y_{0} \} \\
+			\outvars      & = & \{ y \mapsto y_{1} \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & \; y_{1} = y_0 + 1 \\
+			\widehat{\varphi} & = & c_{y}' = c_{y} + 1 \\
+			\end{array}
+			\right.
+			$ %
+		} (4)
+		;
+		\path (4)[densely dotted] edge node {%
+			$
+			\psi_{ass} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \emptyset \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & true\\
+			\widehat{\varphi} & = & true \\
+			\end{array}
+			\right.
+			$ %
+		} (5)
+		;
+		);
+		\end{tikzpicture}
+		\captionof{figure}{$IG_0$}
+		\label{fig:rect}
+	\end{minipage}%
+			\jw{missing $\psi_{global}$; how do i do two arrows in tikz?}
 	\pagebreak
 		
 	\subsection{Interpolation}
