@@ -16,7 +16,7 @@
 \usepackage{amsthm}
 \usepackage{amsmath}
 \usepackage{tikz}
-\usetikzlibrary{positioning,shapes.geometric, arrows,automata, decorations.pathreplacing}
+\usetikzlibrary{positioning,shapes.geometric, arrows,automata, decorations.pathreplacing, calc}
 \usepackage{pgf}
 \usepackage{slantsc}
 \usepackage{geometry}
@@ -589,7 +589,8 @@ urlcolor=g1          % color of external links
 			\end{array}
 			\right.
 			$ %
-		} (4)
+		} ($(3)!0.3!(4)$) edge[thick] ($(3)!0.6!(4)$) edge
+        node[left] {ahahahah}(4)
 		;
 		\path (4)[densely dotted] edge node {%
 			$
