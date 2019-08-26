@@ -212,6 +212,10 @@ urlcolor=g1          % color of external links
 	\mapsto \psi_0))$
 	
 	\bigskip
+    
+    \newcommand{\WidestEntry}{$\psi_{global}$}%
+    \newcommand{\SetToWidest}[1]{\makebox[\widthof{\WidestEntry}]{$#1$}}%
+    
 		
 		\begin{minipage}{.3\textwidth}
 			\centering
@@ -240,7 +244,7 @@ urlcolor=g1          % color of external links
 				
 				\path (1) edge node {%
 					$
-					\psi_0 := \left\{
+					\SetToWidest{\psi_0} := \left\{
 					\begin{array}{lcl}
 					\invars       & = & \emptyset \\
 					\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
@@ -557,7 +561,7 @@ urlcolor=g1          % color of external links
 		
 		\path (1) edge node {%
 			$
-			\psi_0 := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_0} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
@@ -565,13 +569,14 @@ urlcolor=g1          % color of external links
 			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
 			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 			\end{array}
-			\right.
+			\right. \\
+            \end{array}
 			$ %
 		} (2)
 		;
 		\path (2)[densely dotted] edge node {%
 			$
-			\psi_{global} := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_{global}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
 			\outvars      & = & \{ y \mapsto y_0, \ y_{old} \mapsto y_{old_0} \} \\
@@ -579,11 +584,11 @@ urlcolor=g1          % color of external links
 			\varphi       & = & y_0 = y_{old_0} \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
-			\right.
+			\right. \\\end{array}
 			$ %
 		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
 			$
-			\psi_{old} := \left\{
+			\SetToWidest{\psi_{old}} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y \mapsto y_{0} \} \\
 			\outvars      & = & \{ y \mapsto y_{0}, \ y_{old} \mapsto y_{old_1} \} \\
@@ -597,7 +602,7 @@ urlcolor=g1          % color of external links
 		;
 		\path (3) edge node {%
 			$
-			\psi_{1} := \left\{
+			\SetToWidest{\psi_{1}} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{ y_{old} \mapsto y_{old_0} \} \\
 			\outvars      & = & \{ y \mapsto y_{0} \} \\
@@ -611,7 +616,7 @@ urlcolor=g1          % color of external links
 		;
 		\path (4)[densely dotted] edge node {%
 			$
-			\psi_{ass} := \left\{
+			\SetToWidest{\psi_{ass}} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \emptyset \\
