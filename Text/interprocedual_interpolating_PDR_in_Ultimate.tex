@@ -271,7 +271,7 @@ urlcolor=g1          % color of external links
 	
 	
 	\subsection*{Example 2:}
-	Assume we are given a program that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
+	Assume we are given program $P_1$ that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
 	\mapsto \psi_1))$
 
 		\begin{minipage}{.3\textwidth}
@@ -338,7 +338,7 @@ urlcolor=g1          % color of external links
 	
 	\bigskip
 
-			\begin{minipage}{.3\textwidth}
+	\begin{minipage}{.3\textwidth}
 		\centering
 		\begin{align*}
 			&\texttt{x, y : int}; \\
@@ -402,7 +402,6 @@ urlcolor=g1          % color of external links
 		\captionof{figure}{$G_{0+1}$}
 		\label{fig:rect}
 	\end{minipage}%
-
 
 	We see $CFG_{0+1}$ contains two TFs. We can get a single formula describing the whole program by concatenating those two formulas:
 	$\psi_2 = \psi_0 \circ \psi_1$ \\
@@ -509,20 +508,28 @@ urlcolor=g1          % color of external links
 		\end{itemize}
 	\end{mydef}
 	
-	Assume we are given program $P_2$ that is represented by ICFG $IG_0$ \\ $IG_0 = (\{ \ell_0, \ell_1,  \ell_2, \ell_3 \}, \{ (\ell_0, \ell_1), (\ell_1, \ell_2), \\ (\ell_2,\ell_3), (\ell_3, \ell_4)\}, \ell_0, \emptyset, ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_{call}, (\ell_2, \ell_3) \mapsto \psi_1, (\ell_3, \ell_4) \mapsto \psi_{return}))$
+	Assume we are given program $P_2$ that is represented by ICFG $IG_0 = (Loc_2, \Delta_2, \ell_{init}, \ell_E, st_2, proc_2)$
+	\begin{itemize}
+		\item  $Loc_2= \{ \ell_0, \ell_1,  \ell_2, \ell_3 \} $
+		\item $\Delta_2 = \{ (\ell_0, \ell_1), (\ell_1, \ell_2), (\ell_2,\ell_3), (\ell_3, \ell_4)\}$
+		\item $\ell_{init} = \ell_0$ 
+		\item $\ell_E = \emptyset$
+		\item $st_2 = ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_{call}, (\ell_2, \ell_3) \mapsto \psi_1, (\ell_3, \ell_4) \mapsto \psi_{return})$
+		\item $proc_2 = \{ main(), inc()\}$
+	\end{itemize} 
 	
 	\bigskip
 	
 	\begin{minipage}{.3\textwidth}
 		\centering
 		\begin{align*}
-		&\texttt{x, y : int}; \\
-		&\texttt{x := 0}; \\
-		&\texttt{y := 0;} \\
-		&\texttt{call inc();} \\ \\
-		&\texttt{procedure inc() \{} \\
+		&\texttt{x, y : int}; \\ \\
+		&\texttt{procedure main():} \\
+		&\texttt{\hspace*{1em} x := 0}; \\
+		&\texttt{\hspace*{1em} y := 0;} \\
+		&\texttt{\hspace*{1em} call inc();} \\ \\
+		&\texttt{procedure inc():} \\
 		&\texttt{ \hspace*{1em} y:= y\ +\ 1;} \\
-		& \texttt{\}}
 		\end{align*}
 		
 		\captionof{figure}{Program $P_2$}
@@ -542,7 +549,7 @@ urlcolor=g1          % color of external links
 		
 		\node[state] (2) [below of=1] {$\ell_1$};
 		
-		\node[state] (3) [below of=2] {$\ell_{2}$};
+		\node[state] (3) [below=15em of 2] {$\ell_{2}$};
 		
 		\node[state] (4) [below of=3] {$\ell_{3}$};
 		
@@ -564,33 +571,43 @@ urlcolor=g1          % color of external links
 		;
 		\path (2)[densely dotted] edge node {%
 			$
-			\psi_{old} := \left\{
+			\psi_{global} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{y \mapsto y_{in} \} \\
-			\outvars      & = & \{ y \mapsto y_{in}, \ y_{old_0} \mapsto y_{old_1} \} \\
+			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
+			\outvars      & = & \{ y \mapsto y_0, \ y_{old} \mapsto y_{old_0} \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_{old_1} = y_{in} \\
-			\widehat{\varphi} & = & c_{y_{old}}' = c_{y} \\
+			\varphi       & = & y_0 = y_{old_0} \\
+			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
 			\right.
 			$ %
-		} (3)
+		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
+			$
+			\psi_{old} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{y \mapsto y_{0} \} \\
+			\outvars      & = & \{ y \mapsto y_{0}, \ y_{old} \mapsto y_{old_1} \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & y_{old_1} = y_{0} \\
+			\widehat{\varphi} & = & c_{y_{old}}' = c_{y} \\
+			\end{array}
+			\right.
+			$ } (3)
 	
 		;
 		\path (3) edge node {%
 			$
 			\psi_{1} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ y \mapsto y_{0} \} \\
-			\outvars      & = & \{ y \mapsto y_{1} \} \\
+			\invars       & = & \{ y_{old} \mapsto y_{old_0} \} \\
+			\outvars      & = & \{ y \mapsto y_{0} \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & \; y_{1} = y_0 + 1 \\
-			\widehat{\varphi} & = & c_{y}' = c_{y} + 1 \\
-			\end{array}
+			\varphi       & = & \; y_{0} = y_{old_0} + 1 \\
+			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
+		\end{array}
 			\right.
 			$ %
-		} ($(3)!0.3!(4)$) edge[thick] ($(3)!0.6!(4)$) edge
-        node[left] {ahahahah}(4)
+		} (4)
 		;
 		\path (4)[densely dotted] edge node {%
 			$
@@ -608,12 +625,12 @@ urlcolor=g1          % color of external links
 		;
 		);
 		\end{tikzpicture}
-		\captionof{figure}{$IG_0$}
+		\captionof{figure}{$IG_2$}
 		\label{fig:rect}
 	\end{minipage}%
-			\jw{missing $\psi_{global}$; how do i do two arrows in tikz?}
+	
 	\pagebreak
-		
+	\jw{Explain what old, non-old etc variables are. Maybe example with assignment of return}		
 	\subsection{Interpolation}
 	Interpolants are used as a way of covering a more general state space. There are multiple ways of finding interpolants for given formulas.
 	In the following we will introduce two techniques: Craig interpolation and Selfless interpolation. 
@@ -654,8 +671,7 @@ urlcolor=g1          % color of external links
 		As the name suggests proof-obligations have to be proven, if it is possible to generate a proof-obligation on level $i = 0$ we can say that the program is unsafe.
 	\end{mydef}
 	PDR is initialized by generating the first frame for each program location as $\{ false \}$ except the initial location which has frame $\{ true \}$. If there is a transition $(\ell, \ell_E)$ into an error node PDR generates its first proof-obligation $(t, \ell, 1)$ $t$ being the transformula $st(\ell, \ell_E)$.
-	In each new iteration PDR adds a new frame to the program locations. This new frame is $\{true\}$, further
-	an iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
+	In each new iteration there is a new frame added to the program locations. This new frame is initialized as $\{true\}$. An iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
 	
 	\bigskip
 	
@@ -673,26 +689,42 @@ urlcolor=g1          % color of external links
 	
 	\bigskip
 	
-	\jw{Rename details here to definitions used in this paper}
-	\subsection{Example}
-	To illustrate the functionality of our PDR library consider CFG \\ $ G = (\{\ell_0, \ell_1, \ell_2, \ell_E \}, \\ \{(\ell_0, \ell_1), (\ell_1, \ell_1), (\ell_1, \ell_2), (\ell_1, \ell_E) \}, \\ \ell_0, \ell_E, ( (\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_1) \mapsto \psi_1, (\ell_1, \ell_2) \mapsto \psi_2, (\ell_1, \ell_E) \mapsto \psi_E)$ \\
-	With Transformulas: \\
+	\subsection*{Example:}
+	To illustrate the functionality of our PDR library consider program $P_3$ with corresponding CFG $ G_3 = (Loc_3, \Delta_3, \ell_{init}, \ell_E, st) $ with \\ 
 	\begin{itemize}
-	\item $\psi_0$
-	\item $\psi_1$
-	\item $\psi_2$
-	\item $\psi_E$
+		\item $Loc_3 = \{\ell_0, \ell_1, \ell_E \}$
+		\item $\Delta_3 = \{(\ell_0, \ell_1), (\ell_1, \ell_1), (\ell_1, \ell_E) \}$
+		\item $\ell_{init} = \ell_0 $
+		\item $\ell_E = \ell_E$
+		\item $st = ( (\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_1) \mapsto \psi_1, (\ell_1, \ell_E) \mapsto \psi_E)$
 	\end{itemize}
+
+	\begin{minipage}{.3\textwidth}
+	\centering
+	\begin{align*}
+	&\texttt{x, y : int}; \\
+	&\texttt{x := 0}; \\
+	&\texttt{y := x}; \\
+	&\texttt{while(*) \{} \\
+	&\hspace*{1em} \texttt{x := x + 1}; \\
+	&\hspace*{1em} \texttt{y := y + 1;} \\
+	&\texttt{\}} \\
+	& \texttt{assert(x != y)}
+	\end{align*}
 	
 	
 	
-	\begin{figure}[H]
+	\captionof{figure}{Program $P_{3}$}
+	\label{fig:square}
+\end{minipage}%
+\hfill
+\begin{minipage}{.6\textwidth}
 		\centering
-		\hspace*{3cm}
+		\hspace*{-1em}
 		\begin{tikzpicture}[%
 		->,
 		>=stealth', shorten >=1pt, auto,
-		node distance=2cm, scale=1, 
+		node distance=5cm, scale=1, 
 		transform shape, align=center,    
 		smallnode/.style={inner sep=1.4}
 		]
@@ -700,24 +732,55 @@ urlcolor=g1          % color of external links
 		
 		\node[state] (2) [below of=1] {$\ell_1$};
 		
-		\node[state] (3) [below left of=2] {$\ell_2$};
-		
-		\node[state] (4) [below right of=2] {$\ell_E$};
+		\node[state] (4) [below of=2] {$\ell_E$};
 		
 		
 		
-		\path (1) edge node {$x' = 0 \land y' = x'$} (2)
-		(2) edge [loop right] node {$x' = x + 1 \land y' = y + 1$} (2)
-		(2) edge [edge label={$x = y$}, swap] node {} (3)
-		(2) edge [edge label={$x \neq y$}, swap] node {} (4)
+		\path (1) edge node {%
+			$
+			\psi_{0} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \{ y \mapsto y_0, \ x \mapsto x_0 \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_0 = 0\ \land\ y_0 = x_0 \\
+			\widehat{\varphi} & = & c_x' = 0 \ \land \ c_{y}' = c_{x}' \\
+			\end{array}
+			\right.
+			$ %
+		} (2)
+		(2) edge [loop right] node { $
+			\psi_{1} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ y \mapsto x_0, y \mapsto y_0 \} \\
+			\outvars      & = & \{ y \mapsto y_1, \ x \mapsto x_1 \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_1 = x_0 + 1\ \land\ y_1 = y_0 + 1 \\
+			\widehat{\varphi} & = & c_x' = c_x + 1 \ \land \ c_{y}' = c_{y} + 1 \\
+			\end{array}
+			\right.
+			$} (2)
+		(2) edge node {$
+			\psi_{E} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ y \mapsto x_0, y \mapsto y_0 \} \\
+			\outvars      & = & \emptyset \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_0 \neq y_0 \\
+			\widehat{\varphi} & = & c_x \neq c_{y} \\
+			\end{array}
+			\right.
+			$ } (4)
 		;
 		
 		
 		);
 		\end{tikzpicture}
-		\caption{Graph of $\mathcal{B}$.}
-	\end{figure}
+		\captionof{figure}{$G_3$}
 	\label{ex1} 
+\end{minipage}%
+\jw{Do I need the other location of the assert? (Not needed for proof and takes up space)}
+\vspace*{3em}
 	
 	We now want to check whether $\ell_E$ is reachable, using the lifted algorithm: \par
 	
@@ -736,7 +799,6 @@ urlcolor=g1          % color of external links
 			\cmidrule{1-2}
 			$\ell_0$ & $true$ \\
 			$\ell_1$ & $false$ \\
-			$\ell_2$ & $false$ \\
 			\bottomrule
 		\end{tabu}
 	\end{center}
@@ -756,7 +818,6 @@ urlcolor=g1          % color of external links
 			\cmidrule{1-3}
 			$\ell_0$ & $true$ & $true$ \\
 			$\ell_1$ & $false$ & $true$ \\
-			$\ell_2$ & $false$ & $true$ \\
 			\bottomrule
 		\end{tabu}
 	\end{center}
@@ -784,7 +845,6 @@ urlcolor=g1          % color of external links
 				\cmidrule{1-3}
 				$\ell_0$ & $true$ & $true$ \\
 				$\ell_1$ & $false \land x = y$ & $true \land x = y$ \\
-				$\ell_2$ & $false$ & $true$ \\
 				\bottomrule
 			\end{tabu}
 		\end{center}
@@ -820,7 +880,6 @@ urlcolor=g1          % color of external links
 			\cmidrule{1-4}
 			$\ell_0$ & $true$ & $true$ & $true$ \\
 			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true$\\
-			$\ell_2$ & $false$ & $true$ & $true$ \\
 			\bottomrule
 		\end{tabu}
 	\end{center}
@@ -849,7 +908,6 @@ urlcolor=g1          % color of external links
 				\cmidrule{1-4}
 				$\ell_0$ & $true$ & $true$ & $true$ \\
 				$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
-				$\ell_2$ & $false$ & $true$ & $true$ \\
 				\bottomrule
 			\end{tabu}
 		\end{center}
@@ -876,7 +934,6 @@ urlcolor=g1          % color of external links
 			\cmidrule{1-4}
 			$\ell_0$ & $true$ & $true$ & $true$ \\
 			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
-			$\ell_2$ & $false$ & $true$ & $true$ \\
 			\bottomrule
 			\multicolumn{1}{c}{} &  \multicolumn{1}{c}{} & \multicolumn{2}{c}{\upbracefill} \\[-1ex]
 			\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{2}{c}{$\scriptstyle global\ fixpoint$}\\
