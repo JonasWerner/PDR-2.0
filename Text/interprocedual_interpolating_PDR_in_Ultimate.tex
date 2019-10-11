@@ -128,10 +128,13 @@ urlcolor=g1          % color of external links
 	
 	Property Directed Reachability (PDR) was first devised as a hardware verification paradigm by Aaron Bradley \cite{DBLP:conf/vmcai/Bradley11}. It however showed potential as a software verification method as well.
 	In the course of my 2018 Bachelor's Thesis we devised a method of using Property Directed Reachability on software in the software analysis framework \textsc{Ultimate} \cite{Zitat02}. \\
-	Our approach was based on the technique described by Lange et al \cite{DBLP:conf/date/WelpK13}. \\ The implementation worked however solely on intraprocedual programs, meaning that if we encountered a call to another procedure, it would no longer continue the verification process. \\
+	Our approach was based on the technique described by Lange et al \cite{DBLP:conf/date/WelpK13}. \\ The implementation however worked solely on intraprocedual programs, meaning programs containing more than one procedure could not be analysed. \\
 	Furthermore our implementation did not make use of interpolants which broaden the state space covered by blocked proof-obligations. \\
-	This project aims at expanding PDR with both interprocedual analysis capabilities and usage of interpolants. \jw{\textbf{Both kinds of interpolants: Craig and selfless (citation needed)}} \par
-    This paper is structured as follows, firstly we will give some background definition of interprocedual program analysis, and interpolants, then we will describe our changes made to our PDR library.
+	This project aims at expanding PDR with both interprocedual analysis capabilities and usage of interpolants. \par
+	
+    This paper is structured as follows, firstly we will give some background definition of interprocedual program analysis and interpolants, then we will introduce the functionality of our PDR library in Ultimate. In chapter 4 we propose a way of using PDR on programs containing multiple procedures. Chapter 6 discusses our usage of interpolants. Lastly Chapter 7 will provide some benchmarks showing the effectiveness of interprocedual PDR.
+    
+    \pagebreak
 	
 	%-------------------------------------------------%
 	\section{Background}
@@ -212,10 +215,6 @@ urlcolor=g1          % color of external links
 	\mapsto \psi_0))$
 	
 	\bigskip
-    
-    \newcommand{\WidestEntry}{$\psi_{global}$}%
-    \newcommand{\SetToWidest}[1]{\makebox[\widthof{\WidestEntry}]{$#1$}}%
-    
 		
 		\begin{minipage}{.3\textwidth}
 			\centering
@@ -244,7 +243,7 @@ urlcolor=g1          % color of external links
 				
 				\path (1) edge node {%
 					$
-					\SetToWidest{\psi_0} := \left\{
+					\psi_0 := \left\{
 					\begin{array}{lcl}
 					\invars       & = & \emptyset \\
 					\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
@@ -493,35 +492,36 @@ urlcolor=g1          % color of external links
 		An interprocedual control flow graph (ICFG) is a tuple \\$IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$ where $Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, and st have the same definition as in regular CFGs. $proc$ is a set of different procedures found in the program. 
 		%where transitions $(\ell, \ell' \in \Delta)$ are not only internal transitions but also call and return transitions. An ICFG can contain more than one procedure and with that being %able to represent programs that have more than one procedure as well.
 	\end{mydef}
-	What is special about transitions in ICFGs is that they can lead to different procedures:
+	In addition to the transitions we have seen before, ICFGs feature two new kinds that lead the control flow from one procedure of the program to another.
 	\begin{mydef} Assume we are given an ICFG $IG = (Loc, \Delta, \ell_{init}, \ell_E, st, proc)$, we find three distinct classes of program transitions in $\Delta$:
 		\begin{itemize}
 			\item Internal transitions: An internal transition $(\ell, \ell') \in \Delta$ is a program transition where both $\ell$ and $\ell'$ are part of the same procedure. $st(\ell, \ell')$ is a transformula describing the change in variables.
 			
 			\item Call transitions:  A call transition leads the control flow from one procedure to another. We define that each procedure $p \in proc$ has a unique entry location $\ell^{entry}_p$. A transition $(\ell, \ell') \in \Delta$ is called a call transition, if $\ell$ is a location in procedure $p$ and $\ell'$ is the entry location of another procedure $q \in proc$. \\ $st(\ell, \ell')$ consists of three transformulas that function as a connection between $p$ and $q$, \\ $\psi_{old}, \psi_{global}$ and $\psi_{local}$: 
 			\begin{itemize}
-				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the $q$. $\psi_{old}$ is a conjunction of assignments of each of those $g_i$ to a fresh variable $old_{i}$. 
-				\item $\psi_{global}$ is a reverse transformula of $\psi_{old}$ assigning the old variables back to its global counterparts.
-			\end{itemize}
+				\item$\psi_{old}$: Assuming we have global variables $g_0, ..., g_n$ that are modified by the procedure $q$. $\psi_{old}$ is a conjunction of assignments of each $g_i$ to a fresh variable $old_{i}$. 
+				\item $\psi_{global}$: Reverse transformula of $\psi_{old}$ assigning the old variables $old_i$ back to its global counterparts $g_i$.
+				\item $\psi_{local}$: Assuming we have an assignment where a local variable $x$ of procedure $p$ is used and modified by $q$. For example $x := $\texttt{foo(x)}, where \texttt{foo} increases $x$ by 10. \\
+				In that case $\psi_{local}$ maps $x$ to the input variable of $q$.
+			\end{itemize} 
 			
-			\item Return transitions: A return transition leads the control flow from one called procedure back to the original caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. There is a map that maps each return to its corresponding call. \\
-			$st(\ell, \ell')$ consists of two transformulas, $\psi_{ass}$: 
+			\item Return transitions: A return transition leads the control flow from one called procedure back to the caller procedure. We define that each procedure $p \in proc$ has one unique exit location $\ell^{exit}_p$. A transition $(\ell, \ell') \in \Delta$ is called a return transition, if $\ell$ is the exit location $\ell_q^{exit}$ of procedure $q \in proc$ and $\ell'$ is a location of caller procedure $p$. There is a map that maps each return to its corresponding call. \\
+			$st(\ell, \ell')$ consists of transformula $\psi_{ass}$:
 			\begin{itemize}
-				\item $\psi_{ass}$ is a transformula describing how variables that are explicitly mentioned in the call of the corresponding procedure are updated after the return to the calling procedure. For example how $i$ is updated after the call $i := foo()$, where $foo$ changes variable $i$.
+				\item $\psi_{return}$: In case that a local variable $x$ of $p$ was used and modified by $q$, $\psi_{return}$ maps the output of $q$ back to $x$.
 			\end{itemize}
 		\end{itemize}
 	\end{mydef}
 	
-	Assume we are given program $P_2$ that is represented by ICFG $IG_0 = (Loc_2, \Delta_2, \ell_{init}, \ell_E, st_2, proc_2)$
+	Assume we are given program $P_2$ that is represented by ICFG $IG_2 = (Loc_2, \Delta_2, \ell_{init}, \ell_E, st_2, proc_2)$
 	\begin{itemize}
-		\item  $Loc_2= \{ \ell_0, \ell_1,  \ell_2, \ell_3 \} $
-		\item $\Delta_2 = \{ (\ell_0, \ell_1), (\ell_1, \ell_2), (\ell_2,\ell_3), (\ell_3, \ell_4)\}$
-		\item $\ell_{init} = \ell_0$ 
+		\item  $Loc_2= \{ main_0, main_1,  main_2, inc_1, inc_2 \} $
+		\item $\Delta_2 = \{ (main_0, main_1), ( main_1, inc_0), (inc_0, inc_1), (inc_1, main_2)\}$
+		\item $\ell_{init} = main_0$ 
 		\item $\ell_E = \emptyset$
-		\item $st_2 = ((\ell_0, \ell_1) \mapsto \psi_0, (\ell_1, \ell_2) \mapsto \psi_{call}, (\ell_2, \ell_3) \mapsto \psi_1, (\ell_3, \ell_4) \mapsto \psi_{return})$
+		\item $st_2 = (main_0, main_1) \mapsto \psi_0, (main_1, inc_1) \mapsto \psi_{global}, (main_1, inc_1) \mapsto \psi_{old}, (inc_0, inc_1) \mapsto \psi_1,  (inc_1, main_2) \mapsto \psi_{return})$
 		\item $proc_2 = \{ main(), inc()\}$
 	\end{itemize} 
-	
 	\bigskip
 	
 	\begin{minipage}{.3\textwidth}
@@ -549,19 +549,19 @@ urlcolor=g1          % color of external links
 		transform shape, align=center,    
 		smallnode/.style={inner sep=1.4}
 		]
-		\node[state](1){$\ell_0$};
+		\node[state](1){$main_0$};
 		
-		\node[state] (2) [below of=1] {$\ell_1$};
+		\node[state] (2) [below of=1] {$main_1$};
 		
-		\node[state] (3) [below=15em of 2] {$\ell_{2}$};
+		\node[state] (3) [below=15em of 2] {$inc_0$};
 		
-		\node[state] (4) [below of=3] {$\ell_{3}$};
+		\node[state] (4) [below of=3] {$inc_1$};
 		
-		\node[state] (5) [below of=4] {$\ell_{4}$};
+		\node[state] (5) [below of=4] {$main_2$};
 		
 		\path (1) edge node {%
 			$
-			\begin{array}{lcl} \SetToWidest{\psi_0} & := & \left\{
+			\psi_0 := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
@@ -569,14 +569,13 @@ urlcolor=g1          % color of external links
 			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
 			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 			\end{array}
-			\right. \\
-            \end{array}
+			\right.
 			$ %
 		} (2)
 		;
 		\path (2)[densely dotted] edge node {%
 			$
-			\begin{array}{lcl} \SetToWidest{\psi_{global}} & := & \left\{
+			\psi_{global} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
 			\outvars      & = & \{ y \mapsto y_0, \ y_{old} \mapsto y_{old_0} \} \\
@@ -584,11 +583,11 @@ urlcolor=g1          % color of external links
 			\varphi       & = & y_0 = y_{old_0} \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
-			\right. \\\end{array}
+			\right.
 			$ %
 		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
 			$
-			\SetToWidest{\psi_{old}} := \left\{
+			\psi_{old} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y \mapsto y_{0} \} \\
 			\outvars      & = & \{ y \mapsto y_{0}, \ y_{old} \mapsto y_{old_1} \} \\
@@ -602,7 +601,7 @@ urlcolor=g1          % color of external links
 		;
 		\path (3) edge node {%
 			$
-			\SetToWidest{\psi_{1}} := \left\{
+			\psi_{1} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{ y_{old} \mapsto y_{old_0} \} \\
 			\outvars      & = & \{ y \mapsto y_{0} \} \\
@@ -616,7 +615,7 @@ urlcolor=g1          % color of external links
 		;
 		\path (4)[densely dotted] edge node {%
 			$
-			\SetToWidest{\psi_{ass}} := \left\{
+			\psi_{return} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \emptyset \\
@@ -635,7 +634,13 @@ urlcolor=g1          % color of external links
 	\end{minipage}%
 	
 	\pagebreak
-	\jw{Explain what old, non-old etc variables are. Maybe example with assignment of return}		
+	We see $P_2$ consists of two procedures, \texttt{main()} and \texttt{inc()}
+	\jw{more details + example with local vars.}
+	
+	
+	\pagebreak
+	
+	
 	\subsection{Interpolation}
 	Interpolants are used as a way of covering a more general state space. There are multiple ways of finding interpolants for given formulas.
 	In the following we will introduce two techniques: Craig interpolation and Selfless interpolation. 
@@ -650,10 +655,6 @@ urlcolor=g1          % color of external links
 		\end{itemize}
 	\end{mydef}
 
-	Next to Craig interpolation, there are other kinds of getting interpolants:
-	\begin{mydef}
-		\jw{Introduce Selfless interpolation}
-	\end{mydef}
 	\pagebreak
 	
 	%-------------------------------------------------%
@@ -784,7 +785,6 @@ urlcolor=g1          % color of external links
 		\captionof{figure}{$G_3$}
 	\label{ex1} 
 \end{minipage}%
-\jw{Do I need the other location of the assert? (Not needed for proof and takes up space)}
 \vspace*{3em}
 	
 	We now want to check whether $\ell_E$ is reachable, using the lifted algorithm: \par
@@ -950,6 +950,9 @@ urlcolor=g1          % color of external links
 	We see that level 1 equals level 2 on all locations, with that we found global fixpoint position $i = 2$, the forumulas at that position are the inductive invariants proving that $\ell_E$ is not reachable.
 	
 	\section{Interprocedual PDR}
+
+	
+	\subsection{title}
 	
 	
 	\section{Using Interpolants}
