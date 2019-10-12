@@ -194,7 +194,7 @@ urlcolor=g1          % color of external links
     %
 
 	\begin{mydef}
-		A control flow graph (CFG) is a directed graph G = ($Loc$, $\Delta$, $\ell_{init}$, $\ell_E$, st) of a program where
+		A control flow graph (CFG) is a directed graph $G = (Loc, \Delta, \ell_{init}, \ell_E, st)$ of a program where
 		\begin{itemize}
 			\item  Loc is a set of program locations
 			\item $\Delta$ is a set of internal program transitions consisting of tuples $(\ell, \ell')$ with $\ell, \ell' \in Loc$
@@ -219,9 +219,9 @@ urlcolor=g1          % color of external links
 		\begin{minipage}{.3\textwidth}
 			\centering
 			\begin{align*}
-				&\texttt{x, y : int}; \\
-				&\texttt{x := 0}; \\
-				&\texttt{y := 0;}
+				&\texttt{1: x, y : int}; \\
+				&\texttt{2: x := 0}; \\
+				&\texttt{3: y := 0;}
 			\end{align*}
 			
 			\captionof{figure}{Program $P_0$}
@@ -246,9 +246,9 @@ urlcolor=g1          % color of external links
 					\psi_0 := \left\{
 					\begin{array}{lcl}
 					\invars       & = & \emptyset \\
-					\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+					\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
 					\auxvars      & = & \emptyset \\
-					\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+					\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
 					\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 					\end{array}
 					\right.
@@ -266,9 +266,9 @@ urlcolor=g1          % color of external links
 	Where $\psi_0 = (\invars_0, \outvars_0, \auxvars_0, \varphi_0, \widehat{\varphi}_0)$ is a transformula consisting of: 
 	\begin{itemize}
 		\item $\invars_0 = \emptyset$. There are no in-variables because $\varphi_0$ does not depend on any variables. It only assigns the out-vars to 0.
-		\item $\outvars_0 = \{ x \mapsto x_0, y \mapsto y_0\}$
+		\item $\outvars_0 = \{ x \mapsto x_0', y \mapsto y_0'\}$
 		\item $\auxvars_0 = \emptyset$
-		\item $\varphi_0: (x_0 = 0 \land y_0 = 0)$
+		\item $\varphi_0: (x_0' = 0 \land y_0' = 0)$
 		\item $\widehat{\varphi_0}: (c_x' = 0 \land c_y' = 0)$ with $c_x'$ and $c_y'$ being the primed constants of $x$ and $y$.
 	\end{itemize}
 	
@@ -280,9 +280,9 @@ urlcolor=g1          % color of external links
 		\begin{minipage}{.3\textwidth}
 			\centering
 			\begin{align*}
-				&\texttt{x, y : int}; \\
-				&\texttt{x := x + 1}; \\
-				&\texttt{y := y + 1;}
+				&\texttt{1: x, y : int}; \\
+				&\texttt{2: x := x + 1}; \\
+				&\texttt{3: y := y + 1;}
 			\end{align*}
 
 			
@@ -308,9 +308,9 @@ urlcolor=g1          % color of external links
 						\psi_1 := \left\{
 						\begin{array}{lcl}
 						\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
-						\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
+						\outvars      & = & \{ x \mapsto x_{2}' , y \mapsto y_{2}' \} \\
 						\auxvars      & = & \emptyset \\
-						\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+						\varphi       & = & x_{2}' = x_{1} + 1 \; \land \; y_{2}' = x_{2}' + y_{1} \\
 						\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
 						\end{array}
 						\right.
@@ -326,12 +326,12 @@ urlcolor=g1          % color of external links
 		\end{minipage}%
 \bigskip
 
-	Where $\psi = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \widehat{\varphi}_1)$ is a transformula consisting of: 
+	Where $\psi_1 = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \widehat{\varphi}_1)$ is a transformula consisting of: 
 	\begin{itemize}
 		\item $\invars_1 = \{x \mapsto x_1, y \mapsto y_1 \}$.
-		\item $\outvars_1 = \{ x \mapsto x_2, y \mapsto y_2 \}$
+		\item $\outvars_1 = \{ x \mapsto x_2', y \mapsto y_2' \}$
 		\item $\auxvars_1 = \emptyset $
-		\item $	\varphi = ( x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} ) $
+		\item $	\varphi = ( x_{2}' = x_{1} + 1 \; \land \; y_{2}' = x_{2}' + y_{1} ) $
 		\item $\widehat{\varphi} = ( c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y ) $ with $c_x, c_x'$ and $c_y, c_y'$ being the unprimed and primed constants of $x$ and $y$.
 	\end{itemize}
     
@@ -344,11 +344,11 @@ urlcolor=g1          % color of external links
 	\begin{minipage}{.3\textwidth}
 		\centering
 		\begin{align*}
-			&\texttt{x, y : int}; \\
-			&\texttt{x := 0}; \\
-			&\texttt{y := 0;} \\
-			&\texttt{x := x + 1}; \\
-			&\texttt{y := y + 1;}
+			&\texttt{1: x, y : int}; \\
+			&\texttt{2: x := 0}; \\
+			&\texttt{3: y := 0;} \\
+			&\texttt{4: x := x + 1}; \\
+			&\texttt{5: y := y + 1;}
 		\end{align*}
 
 		
@@ -378,9 +378,9 @@ urlcolor=g1          % color of external links
 						\psi_0 := \left\{
 						\begin{array}{lcl}
 						\invars       & = & \emptyset \\
-						\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+						\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
 						\auxvars      & = & \emptyset \\
-						\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+						\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
 						\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 						\end{array}
 						\right.
@@ -392,9 +392,9 @@ urlcolor=g1          % color of external links
 						\psi_1 := \left\{
 						\begin{array}{lcl}
 						\invars       & = & \{x \mapsto x_{1}, y \mapsto y_{1} \} \\
-						\outvars      & = & \{ x \mapsto x_{2} , y \mapsto y_{2} \} \\
+						\outvars      & = & \{ x \mapsto x_{2}', y \mapsto y_{2}' \} \\
 						\auxvars      & = & \emptyset \\
-						\varphi       & = & x_{2} = x_{1} + 1 \; \land \; y_{2} = x_{2} + y_{1} \\
+						\varphi       & = & x_{2}' = x_{1} + 1 \; \land \; y_{2}' = x_{2}' + y_{1} \\
 						\widehat{\varphi} & = & c_{x}' = c_x + 1 \;\land\; c_{y}' = c_{x}' + c_y \\
 						\end{array}
 						\right.
@@ -405,7 +405,7 @@ urlcolor=g1          % color of external links
 		\captionof{figure}{$G_{0+1}$}
 		\label{fig:rect}
 	\end{minipage}%
-
+	\\ \\
 	We see $CFG_{0+1}$ contains two TFs. We can get a single formula describing the whole program by concatenating those two formulas:
 	$\psi_2 = \psi_0 \circ \psi_1$ \\
 	
@@ -419,18 +419,18 @@ urlcolor=g1          % color of external links
 			\item For $\outvars_{1 \circ 2}$ we have to distinguish three cases cases: 
 			\begin{itemize}
 				
-				\item[I:] $(x \mapsto x_i) \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i)$ 
-				\item[II:] $(x \mapsto x_j) \in Out_2$ and $x  \not\in entries(Out_1)$, meaning program variable is solely modified in $\psi_2$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_2: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_j)$ 
+				\item[I:] $(x \mapsto x_i') \in Out_1$ and $x  \not\in entries(Out_2)$, meaning program variable is solely modified in $\psi_1$. In that case the out-variable of the concatenation is the same as the out-variable of $\psi_1: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_i')$ 
+				\item[II:] $(x \mapsto x_j') \in Out_2$ and $x  \not\in entries(Out_1)$, meaning program variable is solely modified in $\psi_2$. In that case the out variable of the concatenation is the same as the out-variable of $\psi_2: $ $\outvars_{1 \circ 2} \cup (x \mapsto x_j')$ 
 				\item[III:] $x \in entries(Out_1)$ and $x \in entries(Out_2)$, meaning program variable $x$ is modified in both transformulas which can create a term variable naming conflict. 
-				In this case $\outvars_{1 \circ 2} \cup (x \mapsto \widehat{x_j})$ where $\widehat{x_j}$ is a fresh term variable that has not been used before.
+				In this case $\outvars_{1 \circ 2} \cup (x \mapsto \widehat{x_j}')$ where $\widehat{x_j}'$ is a fresh term variable that has not been used before.
 				
 			\end{itemize}
 
 			\item $\auxvars_{1 \circ 2} = \{ \widehat{v_i} \ |\ v_i \in \auxvars_1 \cup \auxvars_2 \cup range(\invars_2) \text{ where } \widehat{v_i} \text{ is a fresh variable of } v_i \}$
-			\item $\varphi_{1 \circ 2}$ = $\varphi_1[x_i / x_j, v_i / \widehat{v_i} ] \land \varphi_2[v_j / \widehat{v_j}, x_j / \widehat{x_j}]$, where
+			\item $\varphi_{1 \circ 2}$ = $\varphi_1[x_i' / x_j, v_i / \widehat{v_i} ] \land \varphi_2[v_j / \widehat{v_j}, x_j' / \widehat{x_j}']$, where
 			 \begin{itemize}
-				\item $\varphi_1[x_i / x_j, v_i / \widehat{v_i} ] $ is $\varphi_1$ where we substitute every program variable mapping $(x \mapsto x_i) \in \outvars_1$ with $(x \mapsto x_j) \in \invars_2$ and each $v_i \in \auxvars_1$ with a fresh variable $\widehat{v_i}$.
-				\item  $\varphi_2[v_j / \widehat{v_j}, x_j / \widehat{x_j}]$ is $\varphi_2$ where we substitute each $v_j \in \auxvars_2$ with a fresh variable $\widehat{v_j}$ and each mapping $(x \mapsto x_j) \in \outvars_2$, that fulfills out-variable case $III$, with $(x \mapsto \widehat{x_j})$.
+				\item $\varphi_1[x_i' / x_j, v_i / \widehat{v_i} ] $ is $\varphi_1$ where we substitute every program variable mapping $(x \mapsto x_i') \in \outvars_1$ with $(x \mapsto x_j) \in \invars_2$ and each $v_i \in \auxvars_1$ with a fresh variable $\widehat{v_i}$.
+				\item  $\varphi_2[v_j / \widehat{v_j}, x_j / \widehat{x_j}]$ is $\varphi_2$ where we substitute each $v_j \in \auxvars_2$ with a fresh variable $\widehat{v_j}$ and each mapping $(x \mapsto x_j') \in \outvars_2$, that fulfills out-variable case $III$, with $(x \mapsto \widehat{x_j}')$.
 			\end{itemize} 
 			
 			%is the conjunction of $\varphi_1$ in which we replace every $(x, x_i) \in \outvars_0$ with $(PV, TV_2) \in \invars_2$ and each $v_1 \in \auxvars_1$ with a fresh variable $v_1'$ %and $\varphi_2$ in which we too replace each $v_2 \ in \auxvars_2$ with a fresh variable $v_2'$ and we replace each $(PV, TV_2) \in \outvars_2$ with a fresh variable $TV_2'$.
@@ -442,9 +442,9 @@ urlcolor=g1          % color of external links
 	Using this definition we get $\psi_2 = \psi_0 \circ \psi_1$ with
 	\begin{itemize}
 		\item $\invars_2 = \invars_0 = \emptyset$
-		\item $\outvars_2 = \{ x \mapsto x_3, y \mapsto y_3 \}$ \\ where $x_3$ and $y_3$ are new term variables because $x$ and $y$ are changed in both $\psi_0$ and $\psi_1$.
+		\item $\outvars_2 = \{ x \mapsto x_3', y \mapsto y_3' \}$ \\ where $x_3'$ and $y_3'$ are new term variables because $x$ and $y$ are changed in both $\psi_0$ and $\psi_1$.
 		\item $\auxvars_2 = \{x_1, y_1 \} $
-		\item $\varphi_2 = (x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1)$
+		\item $\varphi_2 = (x_1 = 0 \land y_1 = 0 \land x_3' = x_1 + 1 \land y_3' = x_3' + y_1)$
 		\item $\widehat{\varphi_2} = (c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2)$ \\ We generated new constants for each aux-var: \\
 		$x_1 \mapsto c_1, y_1 \mapsto c_2$
 	\end{itemize}
@@ -468,9 +468,9 @@ urlcolor=g1          % color of external links
 			\psi_2 := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
-			\outvars      & = & \{ x \mapsto x_3, y \mapsto y_3 \} \\
+			\outvars      & = & \{ x \mapsto x_3', y \mapsto y_3' \} \\
 			\auxvars      & = &  \{x_1, y_1 \} \\
-			\varphi       & = & x_1 = 0 \land y_1 = 0 \land x_3 = x_1 + 1 \land y_3 = x_3 + y_1 \\
+			\varphi       & = & x_1 = 0 \land y_1 = 0 \land x_3' = x_1 + 1 \land y_3' = x_3' + y_1 \\
 			\widehat{\varphi} & = & c_1 = 0 \land c_2 = 0 \land c_x' = c_1 + 1 \land c'_y = c_x' + c_2 \\
 			\end{array}
 			\right.
@@ -529,11 +529,11 @@ urlcolor=g1          % color of external links
 		\begin{align*}
 		&\texttt{x, y : int}; \\ \\
 		&\texttt{procedure main():} \\
-		&\texttt{\hspace*{1em} x := 0}; \\
-		&\texttt{\hspace*{1em} y := 0;} \\
-		&\texttt{\hspace*{1em} call inc();} \\ \\
+		&\texttt{\hspace*{1em}1:  x := 0}; \\
+		&\texttt{\hspace*{1em}2:  y := 0;} \\
+		&\texttt{\hspace*{1em}3: call inc();} \\ \\
 		&\texttt{procedure inc():} \\
-		&\texttt{ \hspace*{1em} y:= y\ +\ 1;} \\
+		&\texttt{\hspace*{1em}1: y:= y\ +\ 1;} \\
 		\end{align*}
 		
 		\captionof{figure}{Program $P_2$}
@@ -564,9 +564,9 @@ urlcolor=g1          % color of external links
 			\psi_0 := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
-			\outvars      & = & \{ x \mapsto x_{0} , y \mapsto y_{0} \} \\
+			\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_{0} = 0 \; \land \; y_{0} = 0 \\
+			\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
 			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 			\end{array}
 			\right.
@@ -578,9 +578,9 @@ urlcolor=g1          % color of external links
 			\psi_{global} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
-			\outvars      & = & \{ y \mapsto y_0, \ y_{old} \mapsto y_{old_0} \} \\
+			\outvars      & = & \{ y \mapsto y_0', \ y_{old} \mapsto y_{old_0}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_0 = y_{old_0} \\
+			\varphi       & = & y_0 = y_{old_0}' \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
 			\right.
@@ -590,9 +590,9 @@ urlcolor=g1          % color of external links
 			\psi_{old} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y \mapsto y_{0} \} \\
-			\outvars      & = & \{ y \mapsto y_{0}, \ y_{old} \mapsto y_{old_1} \} \\
+			\outvars      & = & \{ y \mapsto y_{0}', \ y_{old} \mapsto y_{old_1}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_{old_1} = y_{0} \\
+			\varphi       & = & y_{old_1}' = y_{0} \\
 			\widehat{\varphi} & = & c_{y_{old}}' = c_{y} \\
 			\end{array}
 			\right.
@@ -604,9 +604,9 @@ urlcolor=g1          % color of external links
 			\psi_{1} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{ y_{old} \mapsto y_{old_0} \} \\
-			\outvars      & = & \{ y \mapsto y_{0} \} \\
+			\outvars      & = & \{ y \mapsto y_{0}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & \; y_{0} = y_{old_0} + 1 \\
+			\varphi       & = & \; y_{0}' = y_{old_0} + 1 \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
 		\end{array}
 			\right.
@@ -634,7 +634,7 @@ urlcolor=g1          % color of external links
 	\end{minipage}%
 	
 	\pagebreak
-	We see $P_2$ consists of two procedures, \texttt{main()} and \texttt{inc()}
+	$P_2$ consists of two procedures, \texttt{main()} and \texttt{inc()}, that change the global variables $x$ and $y$. Note that we omit $\psi_{local}$ in this case because no local variables are used.
 	\jw{more details + example with local vars.}
 	
 	
@@ -663,27 +663,40 @@ urlcolor=g1          % color of external links
 	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
 	
 	\subsection{PDR for Software}
-	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we proposed a way of using it on software, this approach was based on the technique described by Lange et al. \cite{DBLP:conf/fmcad/0001NN15}
-	Instead of unrolling the transition relation of a given program's CFG like other verification techniques PDR checks only local transitions in a backwards-search like manner.
-	\smallskip
-	To check correctness of a program PDR uses an array of frames for each program location $\ell \in Loc$. 
+	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we proposed a way of using it on software. This approach was based on the technique described by Lange et al \cite{DBLP:conf/fmcad/0001NN15}.
+	Instead of unrolling the transition relation of a given program's CFG, like other verification techniques, PDR checks only local transitions in a backwards-search like manner. \\ \\
+	Given a program $P$ and its CFG  $G = (Loc, \Delta, \ell_{init}, \ell_E, st)$. To check correctness of $P$ PDR uses an array of so called \textsl{frames} for each program location $\ell \in Loc$. 
 	\begin{mydef}
 		A frame $F_{i,\ell}$ is a predicate mapped to a program location $\ell$ and an iteration of PDR, called level, $i$.
 		Every program location $\ell \in Loc$ is assigned its own array of frames. These are used to overapproximate reachable states from the corresponding location.
 	\end{mydef}
-	Furthermore to check reachability of an error state PDR maintains a stack of so called proof-obligations.
+	Furthermore to check reachability of error state $\ell_E$ PDR maintains a stack of so called \textsl{proof-obligations}.
 	\begin{mydef}
-		A proof-obligation is a triple po = $(t, \ell, i)$ with a predicate $t$, a program location $\ell$, and an integer, called level, $i$
-		As the name suggests proof-obligations have to be proven, if it is possible to generate a proof-obligation on level $i = 0$ we can say that the program is unsafe.
+		A proof-obligation is a triple po = $(p, \ell, i)$ with a predicate $p$, a program location $\ell$, and a called level, $i$
+		As the name suggests proof-obligations have to be proven. This is done by checking if $p$ is reachable at the given program location on the level $i$. If it is possible to generate a proof-obligation on level $i = 0$ we can say that $\ell_E$ is reachable from the initial state making the program unsafe.
 	\end{mydef}
-	PDR is initialized by generating the first frame for each program location as $\{ false \}$ except the initial location which has frame $\{ true \}$. If there is a transition $(\ell, \ell_E)$ into an error node PDR generates its first proof-obligation $(t, \ell, 1)$ $t$ being the transformula $st(\ell, \ell_E)$.
-	In each new iteration there is a new frame added to the program locations. This new frame is initialized as $\{true\}$. An iteration of PDR is divided into two phases, the blocking-phase, and the propagation-phase.
+
+	Before entering the first iteration PDR initializes the first frame for each program location as $\{ false \}$ except the initial location whose frame is $\{ true \}$. \\ \\
+	
+	Starting a new iteration PDR adds a new frame to the program locations. This new frame is initialized as $\{true\}$ for every location. After this PDR generates its first proof-obligations: For every transition $(\ell, \ell_E) \in \Delta$ add new proof-obligation $(p, \ell, 1)$, $p$ being the transformula $st(\ell, \ell_E)$, to the proof-obligation stack. With the now no longer empty stack PDR enters the main loop which is divided into two phases: the \textsl{blocking-phase}, and \textsl{propagation-phase}.
 	
 	\bigskip
 	
-	In the blocking phase we try to clear the proof-obligation stack by generating queries to an SMT-solver.
+	First comes the blocking-phase: \\ 
+	Given a proof-obligation $po = (p, \ell, i)$ from the stack, the goal is to prove that the predicate $p$ is not reachable in $\ell$ on PDR level $i$. For that PDR constructs conjunction:
+	\begin{equation*}
+		F_{i - 1, \ell_{pre}} \land st(\ell_{pre}, \ell) \land p'
+	\end{equation*}
+	For every predecessor program location $\ell_{pre}$ where $(\ell_{pre}, \ell) \in \Delta$. 
+	Where 
+	\begin{itemize}
+		\item $F_{i - 1, \ell_{pre}}$ is the frame of level $i - 1$ of the frame array of $\ell_{pre}$
+		\item $st(\ell_{pre}, \ell)$ is the transformula $(\ell_{pre}, \ell)$
+		\item $p'$ is $p$ where every termvariable has been substituted by 
+		
+	\end{itemize}
 	If the query is unsatisfiable, we can block the proof-obligation, meaning that the successors of the given transformula are not reachable.
-	If such a query is satisfiable we know that the corresponding proof-obligation cannot be proven unreachable yet. Given proof-obligation  $po = (t, \ell, i)$ we generate a new proof-obligation $(st(\ell_{pre}, \ell), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$.
+	If such a query is satisfiable we know that the corresponding proof-obligation cannot be proven unreachable yet. Given proof-obligation  $po = (p, \ell, i)$ we generate a new proof-obligation $(st(\ell_{pre}, \ell), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$.
 	
 	\bigskip
 	
