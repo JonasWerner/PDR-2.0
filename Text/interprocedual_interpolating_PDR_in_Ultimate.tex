@@ -682,36 +682,37 @@ urlcolor=g1          % color of external links
 	
 	\bigskip
 	
-	First comes the blocking-phase: \\ 
-	Given a proof-obligation $po_1 = (p, \ell, i)$ from the stack, the goal is to prove that the predicate $p$ is not reachable in $\ell$ on level $i$. For that PDR constructs conjunction:
+	First the blocking-phase: \\ 
+	Given a proof-obligation $po_1 = (p, \ell, i)$ from the stack, the goal is to prove that the predicate $p$ is not reachable in $\ell$ on level $i$. \\ To verify that PDR constructs the following conjunction:
 	\begin{equation*}
 		F_{i - 1, \ell_{pre}} \land st(\ell_{pre}, \ell) \land p'
 	\end{equation*}
-	For every predecessor program location $\ell_{pre}$ where $(\ell_{pre}, \ell) \in \Delta$. With 
+	For every location $\ell_{pre}$ where $(\ell_{pre}, \ell) \in \Delta$. With 
 	\begin{itemize}
-		\item $F_{i - 1, \ell_{pre}}$ the frame of level $i - 1$ of frame array of $\ell_{pre}$
-		\item $st(\ell_{pre}, \ell)$ the transformula $(\ell_{pre}, \ell)$
-		\item $p'$ the predicate $p$ where every termvariable has been substituted by the corresponding primed out-variable of $st(\ell_{pre}, \ell)$
-		
+		\item $F_{i - 1, \ell_{pre}}$ being the frame of $\ell_{pre}$ at level $i - 1$.
+		\item $st(\ell_{pre}, \ell)$ being the transformula assigned to transition $(\ell_{pre}, \ell)$
+		\item $p'$ being the primed variant of $p$. Every termvariable in $p$ has been substituted by the corresponding primed out-variable of $st(\ell_{pre}, \ell)$
 	\end{itemize}
 	This conjunction is checked for satisfiability by an SMT-solver.
 	\begin{itemize}
-		\item If unsatisfiable: Block the proof-obligation by updating $F_{i, \ell} = F_{i, \ell} \land \neg p$. \\ If PDR generates a proof-obligation $(p, ell_{succ}, i + 1)$ for a successor $\ell_{succ}$ of $\ell$ it already knows that $p$ is not reachable. The proof-obligation is discarded form the stack.
-		\item If satisfiable: PDR cannot prove that the proof-obligation is unreachable yet. Generate a new proof-obligation $po_i = (pre(st(\ell_{pre}, \ell), p), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$, with $pre(st(\ell_{pre}, \ell), p)$ being the precondition of transformula $st(\ell_{pre}, \ell)$ and $p$. Both the new proof-obligations and the old proof-obligation are added on top of the stack.
+		\item If unsatisfiable: PDR blocks the proof-obligation by updating $F_{i, \ell} = F_{i, \ell} \land \neg p$. \\ In case there is a future proof-obligation $(p, ell_{succ}, i + 1)$ for a successor $\ell_{succ}$ of $\ell$ generated, then PDR knows already that $p$ is not reachable. The proof-obligation is discarded form the stack.
+		\item If satisfiable: PDR cannot prove that the proof-obligation is unreachable yet. Generate a new proof-obligation $po_i = (pre(st(\ell_{pre}, \ell), p), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$, with $pre(st(\ell_{pre}, \ell), p)$ being the precondition of transformula $st(\ell_{pre}, \ell)$ and $p$. Both the new proof-obligations and the old proof-obligation are added on top of the proof-obligation stack.
 	\end{itemize}
 	This continues until there is a proof-obligation with level 0, proving the program unsafe, or the stack becomes empty.
 	\bigskip
 	
-	If the proof-obligation stack could be emptied PDR enters the propagation-phase where it scouts through the frames of the program locations to find a fixpoint. \\
+	If the proof-obligation stack could be emptied PDR enters the propagation-phase where it iterates through the frames of the program locations to find a fixpoint. \\
 	\begin{mydef}
-		A fixpoint in the frames is a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$. If there is a fixpoint then the program is safe.
+		We call a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$ a fixpoint for the frame array. If there is a fixpoint the program is safe.
 	\end{mydef}
 	If there is neither a proof-obligation on level 0 or a fixpoint PDR starts the next iteration on an incremented level.
+	
+	\jw{Say that the termvariables in the frames are being substituted by the in-variables of TF}
 	
 	\bigskip
 	
 	\subsection*{Example:}
-	To illustrate the functionality of our PDR library consider program $P_3$ with corresponding CFG $ G_3 = (Loc_3, \Delta_3, \ell_{init}, \ell_E, st) $ with \\ 
+	To illustrate the functionality of our PDR library further consider program $P_3$ with corresponding CFG $ G_3 = (Loc_3, \Delta_3, \ell_{init}, \ell_E, st) $ with \\ 
 	\begin{itemize}
 		\item $Loc_3 = \{\ell_0, \ell_1, \ell_E \}$
 		\item $\Delta_3 = \{(\ell_0, \ell_1), (\ell_1, \ell_1), (\ell_1, \ell_E) \}$
@@ -723,14 +724,14 @@ urlcolor=g1          % color of external links
 	\begin{minipage}{.3\textwidth}
 	\centering
 	\begin{align*}
-	&\texttt{x, y : int}; \\
-	&\texttt{x := 0}; \\
-	&\texttt{y := x}; \\
-	&\texttt{while(*) \{} \\
-	&\hspace*{1em} \texttt{x := x + 1}; \\
-	&\hspace*{1em} \texttt{y := y + 1;} \\
-	&\texttt{\}} \\
-	& \texttt{assert(x != y)}
+	&\texttt{1: x, y : int}; \\
+	&\texttt{2: x := 0}; \\
+	&\texttt{3: y := x}; \\
+	&\texttt{4: while(*) \{} \\
+	&\texttt{5:} \hspace*{2em} \texttt{x := x + 1}; \\
+	&\texttt{6:} \hspace*{2em} \texttt{y := y + 1;} \\
+	&\texttt{7: \}} \\
+	& \texttt{8: assert(x == y)}
 	\end{align*}
 	
 	
@@ -762,9 +763,9 @@ urlcolor=g1          % color of external links
 			\psi_{0} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
-			\outvars      & = & \{ y \mapsto y_0, \ x \mapsto x_0 \} \\
+			\outvars      & = & \{x \mapsto x_0', y \mapsto y_0' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_0 = 0\ \land\ y_0 = x_0 \\
+			\varphi       & = & x_0' = 0\ \land\ y_0' = x_0' \\
 			\widehat{\varphi} & = & c_x' = 0 \ \land \ c_{y}' = c_{x}' \\
 			\end{array}
 			\right.
@@ -773,10 +774,10 @@ urlcolor=g1          % color of external links
 		(2) edge [loop right] node { $
 			\psi_{1} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ y \mapsto x_0, y \mapsto y_0 \} \\
-			\outvars      & = & \{ y \mapsto y_1, \ x \mapsto x_1 \} \\
+			\invars       & = & \{ x \mapsto x_0, y \mapsto y_0 \} \\
+			\outvars      & = & \{ x \mapsto x_1', y \mapsto y_1' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_1 = x_0 + 1\ \land\ y_1 = y_0 + 1 \\
+			\varphi       & = & x_1' = x_0 + 1\ \land\ y_1' = y_0 + 1 \\
 			\widehat{\varphi} & = & c_x' = c_x + 1 \ \land \ c_{y}' = c_{y} + 1 \\
 			\end{array}
 			\right.
@@ -784,7 +785,7 @@ urlcolor=g1          % color of external links
 		(2) edge node {$
 			\psi_{E} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ y \mapsto x_0, y \mapsto y_0 \} \\
+			\invars       & = & \{ x \mapsto x_0, y \mapsto y_0 \} \\
 			\outvars      & = & \emptyset \\
 			\auxvars      & = & \emptyset \\
 			\varphi       & = & x_0 \neq y_0 \\
@@ -799,14 +800,14 @@ urlcolor=g1          % color of external links
 		\end{tikzpicture}
 		\captionof{figure}{$G_3$}
 	\label{ex1} 
-\end{minipage}%
-\vspace*{3em}
-	
-	We now want to check whether $\ell_E$ is reachable, using the lifted algorithm: \par
+\end{minipage}% \\
+\vspace*{3em} \\
+	Note that $\psi_0$ and $\psi_1$ represent the concatenation of transformulas relating to the assignments in line 2, 3 and 5, 6 respectively. \\
+	To verify whether it is possible to violate the assertion in line 8 we use PDR to check the reachability of $\ell_E$. \\ \par
 	
 	\textbf{1. Step: Check for 0-Counter-Example} \\
-	Is $\ell_0 = \ell_E$? \\
-	No, we continue with initializing level 0 by adding to each $\ell \in L \backslash \{\ell_0, \ell_E\}$ a new frame $F_{0, \ell} = false$, for $\ell_0$ adding $F_{0, \ell_0} = true$. \\ \\
+	Is the initial location also the error location?
+	No, we continue with initializing level 0 by adding to each $\ell \in L \backslash \{\ell_0, \ell_E\}$ a new frame $F_{0, \ell} = false$, for $\ell_0$ generating $F_{0, \ell_0} = true$. \\ \\
 	
 	
 	\setlength\tabcolsep{0.35em}
@@ -847,14 +848,14 @@ urlcolor=g1          % color of external links
 	
 	We see there is only one transition leading to $\ell_E$, $(\ell_1, x \neq y, \ell_E)$. We get the initial proof-obligation $(x \neq y, \ell_1, 1)$. \\ \\ \par
 	\textbf{3. Step: First Blocking Phase} \\
-	To block the initial proof-obligation $(x \neq y, \ell_1, 1)$ we check each predecessor of $\ell_1$:
+	To block the initial proof-obligation $(x \neq y, \ell_1, 1)$ we have to check the two predecessors of $\ell_1$:
 	
 	\begin{itemize}
 		\item predecessor: $\ell_0$
 		\begin{equation*}
-		\underbrace{true}_{F_{0, \ell_0}} \land \underbrace{x' = 0 \land y' = x'}_{T_{\ell_0 \rightarrow \ell_1}} \land  x' \neq y'
+		\underbrace{true}_{F_{0, \ell_0}} \; \land \; \underbrace{x_0' = 0\ \land\ y_0' = x_0'}_{st(\ell_0, \ell_1)\; = \; \psi_0} \land \; \underbrace{x_0' \neq y_0'}_{p'}
 		\end{equation*}
-		Which is unsatisfiable, we add $\overline{(x \neq y)} \equiv x = y$ to $F_{0, \ell_1}$ and $F_{1, \ell_1}$: \\
+		Which is unsatisfiable, we update our frames with $\neg p = \neg{(x \neq y)} \equiv (x = y)$ to $F_{0, \ell_1}$ and $F_{1, \ell_1}$: \\
 		
 		\begin{center}
 			\begin{tabu}{ccc}
@@ -873,15 +874,15 @@ urlcolor=g1          % color of external links
 		
 		\item predecessor: $\ell_1$
 		\begin{equation*}
-		\underbrace{false \land x = y}_{F_{0, \ell_1}} \land \underbrace{x' = x + 1 \land y' = y + 1'}_{T_{\ell_1 \rightarrow \ell_1}} \land  x' \neq y'
+		\underbrace{false \; \land \; x_0 = y_0}_{F_{0, \ell_1}} \; \land \; \underbrace{x_1' = x_0 + 1 \land y_1' = y_0 + 1'}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \land \; \underbrace{ x_1' \neq y_1'}_{p'}
 		\end{equation*}
-		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$ and $F_{1, \ell_1}$ we move on.
+		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$ and $F_{1, \ell_1}$. The initial proof-obligation has been blocked and can be removed from the obligation stack.
 		
 	\end{itemize}
-	As there are no proof-obligations left, we continue with the first propagation-phase. \\ \\ \par
+	Because the stack is now empty, we continue with the first propagation-phase. \\ \\ \par
 	
 	\textbf{4. Step: First Propagation-Phase} \\
-	Check if there exists a global fixpoint position $i$ where
+	Check if there exists a global fixpoint $i$ where
 	\begin{equation*}
 	F_{i-1, \ell} = F_{i, \ell}
 	\end{equation*}
@@ -899,14 +900,14 @@ urlcolor=g1          % color of external links
 			location & 0 & 1 & 2\\
 			\cmidrule{1-4}
 			$\ell_0$ & $true$ & $true$ & $true$ \\
-			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true$\\
+			$\ell_1$ & $false$ & $x = y$ & $true$\\
 			\bottomrule
 		\end{tabu}
 	\end{center}
 	
 	\hspace*{5cm}
 	
-	Again we generate the initial proof-obligation which is the same as before but on level 2 now, we have the initial proof-obligation $(x \neq y, \ell_1, 2).$ \\ \\ \par
+	Again we generate the initial proof-obligation which is the same as before but on level 2. We have to block the initial proof-obligation $(x \neq y, \ell_1, 2).$ \\ \\ \par
 	
 	
 	\textbf{6. Step: Second Blocking Phase} \\
@@ -915,9 +916,9 @@ urlcolor=g1          % color of external links
 	\begin{itemize}
 		\item predecessor: $\ell_0$
 		\begin{equation*}
-		\underbrace{true}_{F_{1, \ell_0}} \land \underbrace{x' = 0 \land y' = x'}_{T_{\ell_0 \rightarrow \ell_1}} \land  x' \neq y'
+		\underbrace{true}_{F_{1, \ell_0}}\; \land \; \underbrace{x_0' = 0\ \land\ y_0' = x_0'}_{st(\ell_0, \ell_1)\; = \; \psi_0} \; \land \;  \underbrace{x_0' \neq y_0'}_{p'}
 		\end{equation*}
-		Which is unsatisfiable, we add $\overline{(x \neq y)} \equiv x = y$ to $F_{0, \ell_1}$, $F_{1, \ell_1}$ and $F_{2, \ell_1}$:
+		Which is unsatisfiable, we update our frames with $\neg (x \neq y) \equiv x = y$ to $F_{0, \ell_1}$, $F_{1, \ell_1}$ and $F_{2, \ell_1}$:
 		
 		\begin{center}
 			\begin{tabu}{cccc}
@@ -927,7 +928,7 @@ urlcolor=g1          % color of external links
 				location & 0 & 1 & 2\\
 				\cmidrule{1-4}
 				$\ell_0$ & $true$ & $true$ & $true$ \\
-				$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
+				$\ell_1$ & $false$ & $x = y$ & $true \land x = y$ \\
 				\bottomrule
 			\end{tabu}
 		\end{center}
@@ -936,7 +937,7 @@ urlcolor=g1          % color of external links
 		
 		\item predecessor: $\ell_1$
 		\begin{equation*}
-		\underbrace{true \land x = y}_{F_{1, \ell_1}} \land \underbrace{x' = x + 1 \land y' = y + 1}_{T_{\ell_1 \rightarrow \ell_1}} \land  x' \neq y'
+		\underbrace{x_0 = y_0}_{F_{1, \ell_1}} \; \land \; \underbrace{x_1' = x_0 + 1 \land y_1' = y_0 + 1'}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \; \land  \; x_1' \neq y_1'
 		\end{equation*}
 		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$, $F_{1, \ell_1}$, and $F_{2, \ell_1}$ we move on.
 	\end{itemize}
@@ -953,7 +954,7 @@ urlcolor=g1          % color of external links
 			location & 0 & 1 & 2\\
 			\cmidrule{1-4}
 			$\ell_0$ & $true$ & $true$ & $true$ \\
-			$\ell_1$ & $false \land x = y$ & $true \land x = y$ & $true \land x = y$ \\
+			$\ell_1$ & $false$ & $x = y$ & $x = y$ \\
 			\bottomrule
 			\multicolumn{1}{c}{} &  \multicolumn{1}{c}{} & \multicolumn{2}{c}{\upbracefill} \\[-1ex]
 			\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{2}{c}{$\scriptstyle global\ fixpoint$}\\
@@ -965,7 +966,7 @@ urlcolor=g1          % color of external links
 	We see that level 1 equals level 2 on all locations, with that we found global fixpoint position $i = 2$, the forumulas at that position are the inductive invariants proving that $\ell_E$ is not reachable.
 	
 	\section{Interprocedual PDR}
-
+	
 	
 	\subsection{title}
 	
