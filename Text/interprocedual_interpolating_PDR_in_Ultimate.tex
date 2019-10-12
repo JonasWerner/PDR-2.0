@@ -683,28 +683,30 @@ urlcolor=g1          % color of external links
 	\bigskip
 	
 	First comes the blocking-phase: \\ 
-	Given a proof-obligation $po = (p, \ell, i)$ from the stack, the goal is to prove that the predicate $p$ is not reachable in $\ell$ on PDR level $i$. For that PDR constructs conjunction:
+	Given a proof-obligation $po_1 = (p, \ell, i)$ from the stack, the goal is to prove that the predicate $p$ is not reachable in $\ell$ on level $i$. For that PDR constructs conjunction:
 	\begin{equation*}
 		F_{i - 1, \ell_{pre}} \land st(\ell_{pre}, \ell) \land p'
 	\end{equation*}
-	For every predecessor program location $\ell_{pre}$ where $(\ell_{pre}, \ell) \in \Delta$. 
-	Where 
+	For every predecessor program location $\ell_{pre}$ where $(\ell_{pre}, \ell) \in \Delta$. With 
 	\begin{itemize}
-		\item $F_{i - 1, \ell_{pre}}$ is the frame of level $i - 1$ of the frame array of $\ell_{pre}$
-		\item $st(\ell_{pre}, \ell)$ is the transformula $(\ell_{pre}, \ell)$
-		\item $p'$ is $p$ where every termvariable has been substituted by 
+		\item $F_{i - 1, \ell_{pre}}$ the frame of level $i - 1$ of frame array of $\ell_{pre}$
+		\item $st(\ell_{pre}, \ell)$ the transformula $(\ell_{pre}, \ell)$
+		\item $p'$ the predicate $p$ where every termvariable has been substituted by the corresponding primed out-variable of $st(\ell_{pre}, \ell)$
 		
 	\end{itemize}
-	If the query is unsatisfiable, we can block the proof-obligation, meaning that the successors of the given transformula are not reachable.
-	If such a query is satisfiable we know that the corresponding proof-obligation cannot be proven unreachable yet. Given proof-obligation  $po = (p, \ell, i)$ we generate a new proof-obligation $(st(\ell_{pre}, \ell), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$.
-	
+	This conjunction is checked for satisfiability by an SMT-solver.
+	\begin{itemize}
+		\item If unsatisfiable: Block the proof-obligation by updating $F_{i, \ell} = F_{i, \ell} \land \neg p$. \\ If PDR generates a proof-obligation $(p, ell_{succ}, i + 1)$ for a successor $\ell_{succ}$ of $\ell$ it already knows that $p$ is not reachable. The proof-obligation is discarded form the stack.
+		\item If satisfiable: PDR cannot prove that the proof-obligation is unreachable yet. Generate a new proof-obligation $po_i = (pre(st(\ell_{pre}, \ell), p), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$, with $pre(st(\ell_{pre}, \ell), p)$ being the precondition of transformula $st(\ell_{pre}, \ell)$ and $p$. Both the new proof-obligations and the old proof-obligation are added on top of the stack.
+	\end{itemize}
+	This continues until there is a proof-obligation with level 0, proving the program unsafe, or the stack becomes empty.
 	\bigskip
 	
-	If the proof-obligation stack could be emptied, PDR enters the propagation-phase where it scouts through the frames of the program locations to find a fixpoint. \\
+	If the proof-obligation stack could be emptied PDR enters the propagation-phase where it scouts through the frames of the program locations to find a fixpoint. \\
 	\begin{mydef}
-		A fixpoint in the frames is a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$. If there is such a fixpoint then the given program is safe.
+		A fixpoint in the frames is a level $i$ where $F_{i, \ell} = F_{i-1, \ell}$ for every location $\ell \in Loc$. If there is a fixpoint then the program is safe.
 	\end{mydef}
-	If there is neither a proof-obligation on level 0 or a fixpoint in the frames, PDR starts a new iteration.
+	If there is neither a proof-obligation on level 0 or a fixpoint PDR starts the next iteration on an incremented level.
 	
 	\bigskip
 	
