@@ -527,7 +527,7 @@ urlcolor=g1          % color of external links
 	\begin{minipage}{.3\textwidth}
 		\centering
 		\begin{align*}
-		&\texttt{x, y : int}; \\ \\
+		&\texttt{1: x, y : int}; \\ \\
 		&\texttt{procedure main():} \\
 		&\texttt{\hspace*{1em}1:  x := 0}; \\
 		&\texttt{\hspace*{1em}2:  y := 0;} \\
@@ -578,9 +578,9 @@ urlcolor=g1          % color of external links
 			\psi_{global} := \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
-			\outvars      & = & \{ y \mapsto y_0', \ y_{old} \mapsto y_{old_0}' \} \\
+			\outvars      & = & \{ y \mapsto y_1' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_0 = y_{old_0}' \\
+			\varphi       & = & y_1' = y_{old_0} \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
 			\right.
@@ -589,11 +589,11 @@ urlcolor=g1          % color of external links
 			$
 			\psi_{old} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{y \mapsto y_{0} \} \\
-			\outvars      & = & \{ y \mapsto y_{0}', \ y_{old} \mapsto y_{old_1}' \} \\
+			\invars       & = & \{y \mapsto y_{2} \} \\
+			\outvars      & = & \{y_{old} \mapsto y_{old_1}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_{old_1}' = y_{0} \\
-			\widehat{\varphi} & = & c_{y_{old}}' = c_{y} \\
+			\varphi       & = & y_{old_1}' = y_{2} \\
+			\widehat{\varphi} & = & c_{{old_y}}' = c_{y} \\
 			\end{array}
 			\right.
 			$ } (3)
@@ -603,10 +603,10 @@ urlcolor=g1          % color of external links
 			$
 			\psi_{1} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ y_{old} \mapsto y_{old_0} \} \\
-			\outvars      & = & \{ y \mapsto y_{0}' \} \\
+			\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
+			\outvars      & = & \{ y \mapsto y_{3}' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & \; y_{0}' = y_{old_0} + 1 \\
+			\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
 		\end{array}
 			\right.
@@ -643,7 +643,7 @@ urlcolor=g1          % color of external links
 	
 	\subsection{Interpolation}
 	Interpolants are used as a way of covering a more general state space. There are multiple ways of finding interpolants for given formulas.
-	In the following we will introduce two techniques: Craig interpolation and Selfless interpolation. 
+	In the following we will introduce Craig interpolation. 
 	\jw{citation needed}
 	
 	\begin{mydef}
@@ -660,7 +660,7 @@ urlcolor=g1          % color of external links
 	%-------------------------------------------------%
 	\section{PDR in Ultimate}
 	%-------------------------------------------------%
-	In this section we swiftly introduce our PDR implementation, describe how it works, and introduce the problems we solved in this project.
+	In this section we swiftly introduce our PDR implementation used in Ultimate, describe how it works, and introduce the problems we solved in this project.
 	
 	\subsection{PDR for Software}
 	PDR was first devised as a means of hardware verification, however in my 2018 Bachelor's Thesis we proposed a way of using it on software. This approach was based on the technique described by Lange et al \cite{DBLP:conf/fmcad/0001NN15}.
@@ -711,8 +711,8 @@ urlcolor=g1          % color of external links
 	
 	\bigskip
 	
-	\subsection*{Example:}
-	To illustrate the functionality of our PDR library further consider program $P_3$ with corresponding CFG $ G_3 = (Loc_3, \Delta_3, \ell_{init}, \ell_E, st) $ with \\ 
+	\subsection{Example:}
+	To illustrate the functionality of our PDR library consider program $P_3$ with corresponding CFG $ G_3 = (Loc_3, \Delta_3, \ell_{init}, \ell_E, st) $ with \\ 
 	\begin{itemize}
 		\item $Loc_3 = \{\ell_0, \ell_1, \ell_E \}$
 		\item $\Delta_3 = \{(\ell_0, \ell_1), (\ell_1, \ell_1), (\ell_1, \ell_E) \}$
@@ -731,7 +731,7 @@ urlcolor=g1          % color of external links
 	&\texttt{5:} \hspace*{2em} \texttt{x := x + 1}; \\
 	&\texttt{6:} \hspace*{2em} \texttt{y := y + 1;} \\
 	&\texttt{7: \}} \\
-	& \texttt{8: assert(x == y)}
+	& \texttt{8: assert x == y}
 	\end{align*}
 	
 	
@@ -774,10 +774,10 @@ urlcolor=g1          % color of external links
 		(2) edge [loop right] node { $
 			\psi_{1} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ x \mapsto x_0, y \mapsto y_0 \} \\
-			\outvars      & = & \{ x \mapsto x_1', y \mapsto y_1' \} \\
+			\invars       & = & \{ x \mapsto x_1, y \mapsto y_1 \} \\
+			\outvars      & = & \{ x \mapsto x_2', y \mapsto y_2' \} \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_1' = x_0 + 1\ \land\ y_1' = y_0 + 1 \\
+			\varphi       & = & x_2' = x_1 + 1\ \land\ y_2' = y_2 + 1 \\
 			\widehat{\varphi} & = & c_x' = c_x + 1 \ \land \ c_{y}' = c_{y} + 1 \\
 			\end{array}
 			\right.
@@ -785,10 +785,10 @@ urlcolor=g1          % color of external links
 		(2) edge node {$
 			\psi_{E} := \left\{
 			\begin{array}{lcl}
-			\invars       & = & \{ x \mapsto x_0, y \mapsto y_0 \} \\
+			\invars       & = & \{ x \mapsto x_3, y \mapsto y_3 \} \\
 			\outvars      & = & \emptyset \\
 			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_0 \neq y_0 \\
+			\varphi       & = & x_3 \neq y_3 \\
 			\widehat{\varphi} & = & c_x \neq c_{y} \\
 			\end{array}
 			\right.
@@ -805,9 +805,9 @@ urlcolor=g1          % color of external links
 	Note that $\psi_0$ and $\psi_1$ represent the concatenation of transformulas relating to the assignments in line 2, 3 and 5, 6 respectively. \\
 	To verify whether it is possible to violate the assertion in line 8 we use PDR to check the reachability of $\ell_E$. \\ \par
 	
-	\textbf{1. Step: Check for 0-Counter-Example} \\
+	\textsl{1. Step: Check for 0-Counter-Example and Initialization} \\
 	Is the initial location also the error location?
-	No, we continue with initializing level 0 by adding to each $\ell \in L \backslash \{\ell_0, \ell_E\}$ a new frame $F_{0, \ell} = false$, for $\ell_0$ generating $F_{0, \ell_0} = true$. \\ \\
+	No, we continue with initializing level 0 by adding to each $\ell \in Loc \backslash \{\ell_0, \ell_E\}$ a new frame $F_{0, \ell} = false$, for $\ell_0$ generating $F_{0, \ell_0} = true$. \\ \\
 	
 	
 	\setlength\tabcolsep{0.35em}
@@ -827,7 +827,7 @@ urlcolor=g1          % color of external links
 	\hspace*{5cm}
 	
 	
-	\textbf{2. Step: Next Level} \\
+	\textsl{2. Step: First Iteration} \\
 	We initialize new frames for level 1 as \texttt{true}: \\
 	
 	\begin{center}
@@ -847,7 +847,7 @@ urlcolor=g1          % color of external links
 	
 	
 	We see there is only one transition leading to $\ell_E$, $(\ell_1, x \neq y, \ell_E)$. We get the initial proof-obligation $(x \neq y, \ell_1, 1)$. \\ \\ \par
-	\textbf{3. Step: First Blocking Phase} \\
+	\textsl{3. Step: First Blocking Phase} \\
 	To block the initial proof-obligation $(x \neq y, \ell_1, 1)$ we have to check the two predecessors of $\ell_1$:
 	
 	\begin{itemize}
@@ -874,22 +874,22 @@ urlcolor=g1          % color of external links
 		
 		\item predecessor: $\ell_1$
 		\begin{equation*}
-		\underbrace{false \; \land \; x_0 = y_0}_{F_{0, \ell_1}} \; \land \; \underbrace{x_1' = x_0 + 1 \land y_1' = y_0 + 1'}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \land \; \underbrace{ x_1' \neq y_1'}_{p'}
+		\underbrace{false \; \land \; x_1 = y_1}_{F_{0, \ell_1}} \; \land \; \underbrace{x_2' = x_1 + 1 \land y_2' = y_1 + 1}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \land \; \underbrace{ x_2' \neq y_2'}_{p'}
 		\end{equation*}
 		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$ and $F_{1, \ell_1}$. The initial proof-obligation has been blocked and can be removed from the obligation stack.
 		
 	\end{itemize}
 	Because the stack is now empty, we continue with the first propagation-phase. \\ \\ \par
 	
-	\textbf{4. Step: First Propagation-Phase} \\
+	\textsl{4. Step: First Propagation-Phase} \\
 	Check if there exists a global fixpoint $i$ where
 	\begin{equation*}
 	F_{i-1, \ell} = F_{i, \ell}
 	\end{equation*}
-	for every location $\ell \in L \backslash \{l_E \}$. \\
+	for every location $\ell \in Loc \backslash \{l_E \}$. \\
 	We see there is no such $i$, we continue with the next level. \\ \\ \par
 	
-	\textbf{5. Step: Next Level} \\
+	\textsl{5. Step: Next Iteration} \\
 	We initialize new frames for level 2 as \texttt{true}: \\
 	
 	\begin{center}
@@ -910,7 +910,7 @@ urlcolor=g1          % color of external links
 	Again we generate the initial proof-obligation which is the same as before but on level 2. We have to block the initial proof-obligation $(x \neq y, \ell_1, 2).$ \\ \\ \par
 	
 	
-	\textbf{6. Step: Second Blocking Phase} \\
+	\textsl{6. Step: Second Blocking Phase} \\
 	To block proof-obligation $(x \neq y, \ell_1, 2)$ we check the predecessors of $\ell_1$:
 	
 	\begin{itemize}
@@ -937,14 +937,15 @@ urlcolor=g1          % color of external links
 		
 		\item predecessor: $\ell_1$
 		\begin{equation*}
-		\underbrace{x_0 = y_0}_{F_{1, \ell_1}} \; \land \; \underbrace{x_1' = x_0 + 1 \land y_1' = y_0 + 1'}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \; \land  \; x_1' \neq y_1'
+		\underbrace{x_1 = y_1}_{F_{1, \ell_1}} \; \land \; \underbrace{x_2' = x_1 + 1 \land y_2' = y_1 + 1'}_{st(\ell_1, \ell_1)\; = \; \psi_{1}} \; \land  \; x_2' \neq y_2
+		'
 		\end{equation*}
 		Which is unsatisfiable as well, but because $x = y$ has already been added to $F_{0, \ell_1}$, $F_{1, \ell_1}$, and $F_{2, \ell_1}$ we move on.
 	\end{itemize}
 	
 	As there are no proof-obligations left, we continue with the second propagation-phase \\ \\ \par
 	
-	\textbf{7. Step: Second Propagation-Phase} \\
+	\textsl{7. Step: Second Propagation-Phase} \\
 	
 	\begin{center}
 		\begin{tabu}{cccc}
@@ -963,14 +964,813 @@ urlcolor=g1          % color of external links
 	
 	\hspace*{5cm}
 	
-	We see that level 1 equals level 2 on all locations, with that we found global fixpoint position $i = 2$, the forumulas at that position are the inductive invariants proving that $\ell_E$ is not reachable.
+	We see that level 1 equals level 2 on all locations. The global fixpoint position is $i = 2$, $\ell_E$ is therefore not reachable.
+	
+	\subsection{Programs with Multiple Procedures}
+	Most programs usually feature more than one procedure, to verify them a simple CFG is not precise enough. We use ICFGs to describe them. If we wanted to use PDR on ICFGs several problems arise:
+	\jw{Explain why normal PDR does not work on procedures.}
 	
 	\section{Interprocedual PDR}
+	For using our PDR algorithm on programs with multiple programs and their representation as ICFGs, we propose the following recursive extension.
+	\subsection{Recursive PDR}
+	Our PDR implementation works fine on single procedures. Because of the backwards-search like manner of the algorithm, it always finds the return transition before the call to another procedure. Our idea was to check those two procedures individually, meaning when PDR finds a return transition, it takes the sub-graph of the ICFG, that contains the corresponding procedure, handles it as a CFG and starts a new sub execution of PDR on that. \\ \\
+	Now that we can have multiple recursive PDR instances we need to distinguish the frames of them. We split the frame array into a local and global instance:
+	\begin{itemize}
+		\item The global frames are used in an instance overarching manner, they save all the knowledge, learned information about reachability, that were compiled by individual PDR executions up until this point.
+		\item The local frames are the frame arrays that are used by the distinct PDR instances, they are equivalent to the frame arrays in the intraprocedual PDR algorithm from before. They are however initialized by utilizing the information of the global frames.
+	\end{itemize}
+	Now the question is, what does a sub execution of PDR check for as there are usually no error locations in the other procedure so that we cannot generate individual proof-obligations.
+	The intuition is, when we find a return transition $ret$ of another procedure $q$, we have a proof-obligation $po = (p, \ell_{ex}, i)$ where $\ell_{ex}$ is the return transition's target. Obligation $po$ exists because we want to check if predicate $p$ is satisfiable by the previous states of $\ell_{ex}$, so we have to check if executing the procedure belonging to $ret$ influences the program in a way that that is the case. \\ The sub-PDR instance constructs the initial proof-obligation $po_{proc} = (p, \ell_{ret}, 1)$ for $q$ where $\ell_{ret}$ is the source of $ret$, the last program location in $q$. \\ \par
+	When the sub-execution of PDR for $q$ with $po_{proc}$ terminates there are two possibilities: 
+	\begin{itemize}
+		\item PDR returns unsatisfiable: It is proven that $q$ does not change the execution of the program in a way that $p$ is satisfiable at $\ell_{ex}$. With that the original proof-obligation $po$ has been blocked, and the normal way of updating the frames begins. Additionally the local frames of the finished sub-instance are added to the global frames.
+		\item PDR returns satisfiable: It is not proven that executing the procedure cannot lead the program to satisfy $p$. 
+	\end{itemize}
+	If the sub-execution returns satisfiable it means there was a proof-obligation $po_{last} = (p_1, \ell, 1)$ where the SMT-query:
+	\begin{equation}
+		F_{\ell_{pre}, 0} \; \land \; st(\ell_{pre}, \ell) \; \land \; p_1'
+	\end{equation}
+	was satisfiable. Just like in the original algorithm we need to gather more information to block that proof-obligation. To do this we start a third insatance of PDR on the remainder of the program. Its initial proof-obligation starts at the program location $\ell_{call}$ where the procedure has been called from, and its predicate is the precondition $pre(p_1, st(\ell_{pre}, \ell))$
+	The goal is to verify whether that precondition is reachable by the remainder of the program. \\ \par
+	When this third instance of PDR also terminates we again have to possibilities: 
+	\begin{itemize}
+		\item Satisfiable: The rest of the program can reach $p'$ and with that the error will be reached through the procedure, making the program unsafe.
+		\item Unsatisfiable: $p'$ cannot be reached, the global frames are updated and PDR executes the sub-instance on the procedure again to make sure it is blocked this time. If so, the original proof-obligation that found the return in the first place has been blocked, and the frames are updated like before, if not, then there has to be another proof-obligation that starts another PDR instance on the rest of the program again.
+	\end{itemize}
+	If the third PDR instance finds another procedure $q_1$ the whole process starts again for $q_1$, making PDR truly recursive.
 	
 	
-	\subsection{title}
+	
+	\subsection{Example}
+	To show the changes made to our PDR implementation reconsider $P_2$ from before with an added assertion in line 4 of \texttt{main()}.\\
+	
+	\begin{minipage}{.3\textwidth}
+		\centering
+		\begin{align*}
+		&\texttt{1: x, y : int}; \\ \\
+		&\texttt{procedure main():} \\
+		&\texttt{\hspace*{1em}1:  x := 0}; \\
+		&\texttt{\hspace*{1em}2:  y := 0;} \\
+		&\texttt{\hspace*{1em}3: call inc();} \\
+		&\texttt{\hspace*{1em}4: assert y == x + 1} \\ \\
+		&\texttt{procedure inc():} \\
+		&\texttt{\hspace*{1em}1: y := y\ +\ 1;} \\
+		\end{align*}
+		
+		\captionof{figure}{Modified Program $P_2$}
+		\label{fig:square}
+	\end{minipage}%
+	\hfill
+	\begin{minipage}{.6\textwidth}
+		\centering
+		\begin{tikzpicture}[%
+		->,
+		>=stealth', shorten >=1pt, auto,
+		node distance=3cm, scale=1, 
+		transform shape, align=center,    
+		smallnode/.style={inner sep=1.4}
+		]
+		\node[state](1){$main_0$};
+		
+		\node[state] (2) [below of=1] {$main_1$};
+		
+		\node[state] (3) [below=15em of 2] {$inc_0$};
+		
+		\node[state] (4) [below of=3] {$inc_1$};
+		
+		\node[state] (5) [below of=4] {$main_2$};
+		
+		\node[state] (6) [below of=5] {$main_E$};
+		
+		\path (1) edge node {%
+			$
+			\psi_0 := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
+			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+			\end{array}
+			\right.
+			$ %
+		} (2)
+		;
+		\path (2)[densely dotted] edge node {%
+			$
+			\psi_{global} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
+			\outvars      & = & \{ y \mapsto y_1' \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & y_1' = y_{old_0} \\
+			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
+			\end{array}
+			\right.
+			$ %
+		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
+			$
+			\psi_{old} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{y \mapsto y_{2} \} \\
+			\outvars      & = & \{y_{old} \mapsto y_{old_1}' \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & y_{old_1}' = y_{2} \\
+			\widehat{\varphi} & = & c_{{old_y}}' = c_{y} \\
+			\end{array}
+			\right.
+			$ } (3)
+		
+		;
+		\path (3) edge node {%
+			$
+			\psi_{1} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
+			\outvars      & = & \{ y \mapsto y_{3}' \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
+			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
+			\end{array}
+			\right.
+			$ %
+		} (4)
+		;
+		\path (4)[densely dotted] edge node {%
+			$
+			\psi_{return} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \emptyset \\
+			\outvars      & = & \emptyset \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & true\\
+			\widehat{\varphi} & = & true \\
+			\end{array}
+			\right.
+			$ %
+		} (5)
+		;
+		\path (5)[] edge node {%
+			$
+			\psi_{E} := \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ x \mapsto x_1, y \mapsto y_4 \} \\
+			\outvars      & = & \emptyset \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & y_4 \neq x_1 + 1 \\
+			\widehat{\varphi} & = & c_{y} \neq c_x + 1\\
+			\end{array}
+			\right.
+			$  %
+		} (6)
+		;
+		);
+		\end{tikzpicture}
+		\captionof{figure}{\hspace*{1em} $IG_2$ with Error location}
+		\label{fig:rect}
+	\end{minipage}%
+\pagebreak
+
+	Because $P_2$ consists of two procedures we have to use interprocedual PDR to check reachability of error location $main_E$. \\ \\
+	
+	\textsl{1. Step: Check for 0-Counter-Example and Initialization} \\
+	Is $main_0 = main_E$? No, begin initialization of the global frames which is similar to the 1. step of the ordinary algorithm, except there are multiple initial locations, $main_0$ for procedure \texttt{main} and $inc_0$ for \texttt{inc}, that need the true predicate. \\ \\
+	
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 \\
+			\cmidrule{1-2}
+			$main_0$ & $true$ \\
+			$main_1$ & $false$ \\
+			$main_2$ & $false$ \\
+			$inc_0$ & $true$ \\
+			$inc_1$ & $false$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+	
+	\vspace*{1em}
+	\textsl{2. Step: Local Frame Initialization} \\
+	
+	Now we start the first PDR instance, for it we need to construct its local frame array by using the information stored in the global frames. \\ \\
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Local Frames & \texttt{main} \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+	\textsl{3. Step: First Iteration} \\
+	Initialize the first level of the local frames as true for all locations. \\
+	\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 \\
+			\cmidrule{1-2}
+			$main_0$ & $true$ \\
+			$main_1$ & $false$ \\
+			$main_2$ & $false$ \\
+			$inc_0$ & $true$ \\
+			$inc_1$ & $false$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{ccc}
+				Local Frames & \texttt{main}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 & 1 \\
+				\cmidrule{1-3}
+				$main_0$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $true$\\
+				$main_2$ & $false$ & $true$\\
+				$inc_0$ & $true$ & $true$\\
+				$inc_1$ & $false$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+
+	There is only one transition to the error location, we get the initial proof-obligation \\ $po = (y \neq x + 1, main_2, 1)$  \\ \\
+	
+	\textsl{4. Step: First Blocking-Phase} \\
+	To block the proof-obligation $(y \neq x + 1, main_2, 1)$ we need to check each predecessor of $main_2$. There is only one, $inc_1$, but $st(inc_1, main_2)$ is the return transition of procedure \texttt{inc}, which necessitates the usage of a new PDR instance. \\
+	First get the CFG of procedure \texttt{inc}: \\ \\
+	
+	\begin{center}
+	\begin{tikzpicture}[%
+	->,
+	>=stealth', shorten >=1pt, auto,
+	node distance=3cm, scale=1, 
+	transform shape, align=center,    
+	smallnode/.style={inner sep=1.4}
+	]
+
+	\node[state] (3) [below=15em of 2] {$inc_0$};
+	
+	\node[state] (4) [below of=3] {$inc_1$};
+
 	
 	
+	\path (3) edge node {%
+		$
+		\psi_{1} := \left\{
+		\begin{array}{lcl}
+		\invars       & = & \{ y \mapsto y_{2} \} \\
+		\outvars      & = & \{ y \mapsto y_{3}' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & \; y_{3}' = y_{2} + 1 \\
+		\widehat{\varphi} & = & c_{y}' = c_{y} + 1 \\
+		\end{array}
+		\right.
+		$ %
+	} (4)
+	;
+	);
+	\end{tikzpicture}
+	\captionof{figure}{$CFG$ of \texttt{inc}}
+	\end{center}
+	The initial proof-obligation of this sub-execution is $(y \neq x + 1, inc_1, 1)$, so the same predicate as in the initial obligation, but on $inc_1$. \\
+	
+	\textsl{5. Step: Sub-PDR Local Frame and First Level Initialization} \\
+	For this Sub-PDR we do not need the local frames of \texttt{main} but a new array that integrates only locations found in \texttt{inc}. \\
+	
+		\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{ccc}
+				Local Frames & \texttt{inc} \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 & 1 \\
+				\cmidrule{1-3}
+				$inc_0$ & $true$ & $true$ \\
+				$inc_1$ & $false$ & $true$ \\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+	
+	
+	\textsl{6. Step: Sub-PDR Blocking Phase} \\
+	To block proof-obligation $(y \neq x + 1, inc_1, 1)$ we check the predecessor $inc_0$ of $inc_1$: \\
+		\begin{equation*}
+		\underbrace{true}_{F_{0, inc_0}}\; \land \; \underbrace{y_3' = y_2 + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x + 1}_{p'}
+		\end{equation*}
+		\jw{In dem fall dass eine variable weder in In oder Out vorkommt ist sie Aux, oder einfach eine freie Variable? Hier x}
+		This is satisfiable because we do not know anything about x in this context. \\
+		We generate a proof-obligation on level 0, terminating the sub-PDR returning that the proof-obligation is satisfiable. \\ \\
+	
+	\textsl{7. Step: Blocking of Procedure inc} \\
+	We know now, that it is possible to reach the error through \texttt{inc}. To know what has to hold for that to happen, we compute the precondition $pre(y \neq x + 1, y = y + 1) = y \neq x$. We know have to prove whether $y \neq x$ holds when entering \texttt{inc} meaning that it holds at the call location $main_1$. We get a new proof-obligation $(y \neq x, main_1, 1)$. A third PDR instance is needed. \\ \\
+	
+	\textsl{8. Step: PDR on Remainder of Program} \\
+	Get the CFG of the remainder of the program: \\ \\
+	\begin{center}	
+	\begin{tikzpicture}[%
+	->,
+	>=stealth', shorten >=1pt, auto,
+	node distance=3cm, scale=1, 
+	transform shape, align=center,    
+	smallnode/.style={inner sep=1.4}
+	]
+	\node[state](1){$main_0$};
+	
+	\node[state] (2) [below of=1] {$main_1$};
+	
+	\path (1) edge node {%
+		$
+		\psi_0 := \left\{
+		\begin{array}{lcl}
+		\invars       & = & \emptyset \\
+		\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
+		\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+		\end{array}
+		\right.
+		$ %
+	} (2)
+	;
+	);
+	\end{tikzpicture}
+	\captionof{figure}{$CFG$ of $P_2$ remainder}
+	\label{fig:rect}
+	\end{center}
+	
+	
+	\textsl{9. Step: Third PDR Local Frame and First Level initialization} \\
+	We again need a local frame array for the remainder: \\ \\
+		\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{ccc}
+				Local Frames & \texttt{remainder}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-3}
+				$main_0$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+	
+	\textsl{10. Step: Third PDR First Blocking Phase} \\
+		To block proof-obligation $(y \neq x, main_1, 1)$ we check the predecessor $main_0$ of $main_1$: \\
+	\begin{equation*}
+	\underbrace{true}_{F_{0, main_0}}\; \land \; \underbrace{x_0' = 0 \; \land \; y_0' = 0}_{\psi_0} \land \; \underbrace{y_0' \neq x_0'}_{p'}
+	\end{equation*}
+	Which is unsatisfiable, update the local frames of $main_1$ with $\neg(y \neq y) \equiv (y = x)$: \\ 
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{ccc}
+				Local Frames & \texttt{remainder}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 & 1 \\
+				\cmidrule{1-3}
+				$main_0$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $y = x$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+	
+	There are no other proof-obligations left, start the first propagation-phase. \\ \\
+	
+	\textsl{11. Step: Third PDR First Propagation Phase} \\
+	Is there a global fixpoint in the local frames of remainder? No, we start a new iteration. \\ \\
+	
+	\textsl{12. Step: Third PDR Next Iteration} \\
+	Initialize level 2 local frames:
+	
+			\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Local Frames & \texttt{remainder}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-4}
+				$main_0$ & $true$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $y = x$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	\vspace*{1em}
+	New initial proof-obligation. $(y \neq x, main_1, 1)$. \\ \\
+	
+	\textsl{13. Step: Third PDR Second Blocking Phase} \\
+	To block proof-obligation $(y \neq x, main_1, 2)$ we check the predecessor $main_0$ of $main_1$: \\
+	\begin{equation*}
+	\underbrace{true}_{F_{1, main_0}}\; \land \; \underbrace{x_0' = 0 \; \land \; y_0' = 0}_{\psi_0} \land \; \underbrace{y_0' \neq x_0'}_{p'}
+	\end{equation*}
+	Which is also unsatisfiable, we again update the frames of $main_1$: \\ 
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ \\
+				$main_1$ & $false$ \\
+				$main_2$ & $false$ \\
+				$inc_0$ & $true$ \\
+				$inc_1$ & $false$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Local Frames & \texttt{remainder}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-4}
+				$main_0$ & $true$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $y = x$ & $y = x$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage} \\ \\
+	\textsl{14. Step: Third PDR Second Propagation Phase} \\
+	There is a fixpoint in the local frames, we see levels 1 and 2 are the equal.
+	This means that the precondition for the procedure to lead to the error is not reachable.
+	We now update the global frames with the local frames of remainder and update the initial location of \texttt{inc} with $y = x$ because we know now that this holds before entering the procedure. The global frames contain every locations where local frames do not, any location that is not covered by local get new levels initialized as true. We get updated global frames: \\
+	
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-4}
+				$main_0$ & $true$ & $true$ & $true$  \\
+				$main_1$ & $false$ & $y = x$ & $y = x$\\
+				$main_2$ & $false$ & $true$ & $true$ \\
+				$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+				$inc_1$ & $false$ & $true$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Local Frames & \texttt{remainder}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-4}
+				$main_0$ & $true$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $y = x$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage}
+	
+	However we still have to block the proof-obligation from the second PDR instance: $(y \neq x + 1, inc_1, 1)$. Restart the second instance. \\ \\
+	
+	\textsl{15. Step: Second Instance Initialization} \\
+	We again start by initializing the local using the global frames: \\
+	\begin{minipage}{.4\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-2}
+				$main_0$ & $true$ & $true$ & $true$  \\
+				$main_1$ & $false$ & $y = x$ & $y = x$\\
+				$main_2$ & $false$ & $true$ & $true$ \\
+				$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+				$inc_1$ & $false$ & $true$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.5\textwidth}
+		\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cc}
+				Local Frames & \texttt{inc}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-2}
+				location & 0  \\
+				\cmidrule{1-2}
+				$inc_0$ & $y = x$  \\
+				$inc_1$ & $false$ \\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+	\end{minipage} \\ \\
+
+\textsl{16. Step: Second PDR First Iteration} \\
+Again, instead of initializing level 1 frames as true, we make use of what we learned before by using the global frames: \\
+
+\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 & 1 & 2 \\
+			\cmidrule{1-2}
+			$main_0$ & $true$ & $true$ & $true$  \\
+			$main_1$ & $false$ & $y = x$ & $y = x$\\
+			$main_2$ & $false$ & $true$ & $true$ \\
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+			$inc_1$ & $false$ & $true$ & $true$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{ccc}
+			Local Frames & \texttt{inc}\\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-3}
+			location & 0 & 1  \\
+			\cmidrule{1-3}
+			$inc_0$ & $y = x$ & $y = x$  \\
+			$inc_1$ & $false$ & $true$ \\
+			\bottomrule
+		\end{tabu}
+	\end{center}	
+\end{minipage}
+
+\vspace*{1em}
+
+\textsl{17. Step: Second PDR First Blocking Phase} \\
+To block proof-obligation $(y \neq x + 1, inc_1, 1)$ we check the predecessor $inc_0$ of $inc_1$: \\
+\begin{equation*}
+\underbrace{y_2 = x_0}_{F_{0, inc_0}}\; \land \; \underbrace{y_3' = y_2 + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x_0 + 1}_{p'}
+\end{equation*}
+
+Which is unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \neq x + 1) \equiv (y = x + 1)$: \\ \\
+
+
+\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 & 1 & 2 \\
+			\cmidrule{1-2}
+			$main_0$ & $true$ & $true$ & $true$  \\
+			$main_1$ & $false$ & $y = x$ & $y = x$\\
+			$main_2$ & $false$ & $true$ & $true$ \\
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+			$inc_1$ & $false$ & $true$ & $true$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{ccc}
+			Local Frames & \texttt{inc}\\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-3}
+			location & 0 & 1  \\
+			\cmidrule{1-3}
+			$inc_0$ & $y = x$ & $y = x$  \\
+			$inc_1$ & $false$ & $y = x + 1$ \\
+			\bottomrule
+		\end{tabu}
+	\end{center}	
+\end{minipage}
+
+\vspace*{1em}
+\textsl{18. Step: Second PDR First Propagation Phase} \\
+There is no fixpoint. \\
+After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works analogously as step 17 just on level 2, we get frames: \\
+
+\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-2}
+			location & 0 & 1 & 2 \\
+			\cmidrule{1-2}
+			$main_0$ & $true$ & $true$ & $true$  \\
+			$main_1$ & $false$ & $y = x$ & $y = x$\\
+			$main_2$ & $false$ & $true$ & $true$ \\
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+			$inc_1$ & $false$ & $true$ & $true$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Local Frames & \texttt{inc}\\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2\\
+			\cmidrule{1-4}
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$  \\
+			$inc_1$ & $false$ & $y = x + 1$  & $y = x + 1$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}	
+\end{minipage} \\ \\
+
+And fixpoint level 1 and 2. \\ 
+\jw{TODO the rest.}
+	
+	
+	
+	
+	
+	\pagebreak
 	\section{Using Interpolants}
 	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
 	\begin{equation}
