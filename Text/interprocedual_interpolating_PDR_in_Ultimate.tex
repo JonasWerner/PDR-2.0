@@ -967,43 +967,54 @@ urlcolor=g1          % color of external links
 	We see that level 1 equals level 2 on all locations. The global fixpoint position is $i = 2$, $\ell_E$ is therefore not reachable.
 	
 	\subsection{Programs with Multiple Procedures}
-	Most programs usually feature more than one procedure, to verify them a simple CFG is not precise enough. We use ICFGs to describe them. If we wanted to use PDR on ICFGs several problems arise:
+	Most programs usually feature more than one procedure. For Verifiying them a simple CFG is not precise enough. We use ICFGs to describe them. If we wanted to use PDR on ICFGs several problems arise:
 	\jw{Explain why normal PDR does not work on procedures.}
 	
 	\section{Interprocedual PDR}
-	For using our PDR algorithm on programs with multiple programs and their representation as ICFGs, we propose the following recursive extension.
+	For using our PDR algorithm on programs with multiple programs and their representation as ICFGs, we propose the following recursive extension to our algorithm.
 	\subsection{Recursive PDR}
-	Our PDR implementation works fine on single procedures. Because of the backwards-search like manner of the algorithm, it always finds the return transition before the call to another procedure. Our idea was to check those two procedures individually, meaning when PDR finds a return transition, it takes the sub-graph of the ICFG, that contains the corresponding procedure, handles it as a CFG and starts a new sub execution of PDR on that. \\ \\
-	Now that we can have multiple recursive PDR instances we need to distinguish the frames of them. We split the frame array into a local and global instance:
+	Because of the backwards-search like manner of PDR, it always finds a return transition before a call to another procedure. Our idea was to check those two procedures individually, meaning when PDR finds a return transition, it takes the sub-graph of the ICFG, that contains the corresponding procedure, handles it as a CFG and starts a new instance of PDR on that. \\ \\
+	Assume we have a proof-obligation $po = (p, \ell_{ex}, i)$ for some predicate $p$ at location $\ell$ on level $i$, and assume further that an incoming transition into $\ell$ is a return transition from a procedure $q$. \\
+	What happens in the extended algorithm is now, that PDR analyses the procedures individually from each other, in other words, when PDR finds such a proof-obligation, where an incoming transition is a return transition, it starts a new second PDR instance of the whole corresponding procedure $q$. \\
+	Interprocedual PDR need to verify whether $p$ is reachable by executing $q$ in the program. \\
+	
+	Now that we can multiple recursive PDR instances we need to distinguish the frames of them to propagate information between instances. \\ We characterize two kinds of frame arrays:
 	\begin{itemize}
-		\item The global frames are used in an instance overarching manner, they save all the knowledge, learned information about reachability, that were compiled by individual PDR executions up until this point.
+		\item The global frames are used in an instance overarching manner, they save all the knowledge, learned information about reachability, that were compiled by individual PDR executions before and up until this point. 
 		\item The local frames are the frame arrays that are used by the distinct PDR instances, they are equivalent to the frame arrays in the intraprocedual PDR algorithm from before. They are however initialized by utilizing the information of the global frames.
 	\end{itemize}
-	Now the question is, what does a sub execution of PDR check for as there are usually no error locations in the other procedure so that we cannot generate individual proof-obligations.
-	The intuition is, when we find a return transition $ret$ of another procedure $q$, we have a proof-obligation $po = (p, \ell_{ex}, i)$ where $\ell_{ex}$ is the return transition's target. Obligation $po$ exists because we want to check if predicate $p$ is satisfiable by the previous states of $\ell_{ex}$, so we have to check if executing the procedure belonging to $ret$ influences the program in a way that that is the case. \\ The sub-PDR instance constructs the initial proof-obligation $po_{proc} = (p, \ell_{ret}, 1)$ for $q$ where $\ell_{ret}$ is the source of $ret$, the last program location in $q$. \\ \par
-	When the sub-execution of PDR for $q$ with $po_{proc}$ terminates there are two possibilities: 
+	Now the question is, what does a second instance of PDR check for, as there are usually no error locations in other procedures. We cannot generate individual proof-obligations.
+	The intuition is, when we find a return transition $ret$ of another procedure $q$, we have a proof-obligation $po = (p, \ell_{ex}, i)$ where $\ell_{ex}$ is the return transition's target. Obligation $po$ exists because we want to check if predicate $p$ is satisfiable by the previous states of $\ell_{ex}$, so we have to check if executing the procedure belonging to $ret$ influences the program in a way that that is the case. \\ The second PDR instance constructs the initial proof-obligation $po_{proc} = (p, \ell_{ret}, 1)$ for $q$ where $\ell_{ret}$ is the source of $ret$, the last program location in $q$. \\ \par
+	When the second execution of PDR terminates there are two possibilities: 
 	\begin{itemize}
-		\item PDR returns unsatisfiable: It is proven that $q$ does not change the execution of the program in a way that $p$ is satisfiable at $\ell_{ex}$. With that the original proof-obligation $po$ has been blocked, and the normal way of updating the frames begins. Additionally the local frames of the finished sub-instance are added to the global frames.
-		\item PDR returns satisfiable: It is not proven that executing the procedure cannot lead the program to satisfy $p$. 
+		\item It returns \texttt{unsatisfiable}: It is proven that $q$ does not change the execution of the program in a way that $p$ is satisfiable at $\ell_{ex}$. With that the original proof-obligation $po$ has been blocked and the updating the local frames begins. Additionally the local frames of the finished second instance are added to the global frames to save learned information for subsequent procedure checking.
+		\item PDR returns \texttt{satisfiable}: It is not proven that executing the procedure cannot lead the program to satisfy $p$. 
 	\end{itemize}
 	If the sub-execution returns satisfiable it means there was a proof-obligation $po_{last} = (p_1, \ell, 1)$ where the SMT-query:
 	\begin{equation}
 		F_{\ell_{pre}, 0} \; \land \; st(\ell_{pre}, \ell) \; \land \; p_1'
 	\end{equation}
-	was satisfiable. Just like in the original algorithm we need to gather more information to block that proof-obligation. To do this we start a third insatance of PDR on the remainder of the program. Its initial proof-obligation starts at the program location $\ell_{call}$ where the procedure has been called from, and its predicate is the precondition $pre(p_1, st(\ell_{pre}, \ell))$
-	The goal is to verify whether that precondition is reachable by the remainder of the program. \\ \par
-	When this third instance of PDR also terminates we again have to possibilities: 
+	was satisfiable. Just like in the original algorithm we need to gather more information to block that proof-obligation. To do this we start a third instance of PDR on the remainder of the program. Its initial proof-obligation starts at the program location $\ell_{call}$ where the procedure has been called from, and its predicate is the precondition $p_{pre} = pre(p_1, st(\ell_{pre}, \ell))$
+	The goal is to verify whether that precondition is reachable by the remainder, from the initial location, of the program. \\ \par
+	When this third instance of PDR terminates we again have to possibilities: 
 	\begin{itemize}
-		\item Satisfiable: The rest of the program can reach $p'$ and with that the error will be reached through the procedure, making the program unsafe.
-		\item Unsatisfiable: $p'$ cannot be reached, the global frames are updated and PDR executes the sub-instance on the procedure again to make sure it is blocked this time. If so, the original proof-obligation that found the return in the first place has been blocked, and the frames are updated like before, if not, then there has to be another proof-obligation that starts another PDR instance on the rest of the program again.
+		\item \texttt{satisfiable}: The rest of the program can reach $p_{pre}$ and with that the error will be reached through the procedure, making the program unsafe.
+		\item \texttt{Unsatisfiable}: $p_{pre}$ cannot be reached. The global frames are updated and PDR executes the second PDR instance on the procedure again to make sure it is blocked this time. If so, the original proof-obligation , hat found the return in the first place, has been blocked, and the frames are updated like before, if not, then there has to be another proof-obligation that starts another PDR instance on the rest of the program again.
 	\end{itemize}
-	If the third PDR instance finds another procedure $q_1$ the whole process starts again for $q_1$, making PDR truly recursive.
+	If the third PDR instance finds another procedure the whole process starts again, making PDR truly recursive. \\ \\
 	
+	The biggest changes are made to the blocking and propagation phase. In interprocedual PDR, as described above, there will be a second PDR instance for a discovered procedure and if that returns satisfiability even a third instance on the remainder of the program. These instances rely on information gathered by eachother. For example, when the third PDR instance deems a procedure to be safe, the global frames need to represent that, so that the second instance can use this information to truly block the procedure. \\ \\
+	Because there can be multiple PDR instances, the propagation phase is split into local and global instances as well. After each blocking phase of an individual PDR instance there is a local propagation phase that checks if that instance has a fixpoint. \\
+	If there are no PDR instances left, a global propagation phase checks the global frames for fixpoints, this is done because local frames do not contain all the information about the whole program. If the global phase finds a fixpoint, then the program is truly safe, if not the first instance of PDR starts a new iteration.
 	
 	
 	\subsection{Example}
-	To show the changes made to our PDR implementation reconsider $P_2$ from before with an added assertion in line 4 of \texttt{main()}.\\
+	To illustrate the changes made to our PDR implementation reconsider $P_2$ from before with an added assertion in line 4 of \texttt{main()}.\\
+	\pagestyle{plain} \\
 	
+	
+	\pagebreak
+	\pagestyle{empty}
 	\begin{minipage}{.3\textwidth}
 		\centering
 		\begin{align*}
@@ -1129,7 +1140,11 @@ urlcolor=g1          % color of external links
 		\captionof{figure}{\hspace*{1em} $IG_2$ with Error location}
 		\label{fig:rect}
 	\end{minipage}%
+
+
+
 \pagebreak
+\pagestyle{plain}
 
 	Because $P_2$ consists of two procedures we have to use interprocedual PDR to check reachability of error location $main_E$. \\ \\
 	
@@ -1157,7 +1172,7 @@ urlcolor=g1          % color of external links
 	\vspace*{1em}
 	\textsl{2. Step: Local Frame Initialization} \\
 	
-	Now we start the first PDR instance, for it we need to construct its local frame array by using the information stored in the global frames. \\ \\
+	Now we start the first PDR instance, for it we need to construct its local frame array. \\ \\
 	\begin{minipage}{.5\textwidth}
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
@@ -1243,10 +1258,10 @@ urlcolor=g1          % color of external links
 	
 	\vspace*{1em}
 
-	There is only one transition to the error location, we get the initial proof-obligation \\ $po = (y \neq x + 1, main_2, 1)$  \\ \\
+	There is only one transition leading to the error location, we get the initial proof-obligation \\ $(y \neq x + 1, main_2, 1)$  \\ \\
 	
 	\textsl{4. Step: First Blocking-Phase} \\
-	To block the proof-obligation $(y \neq x + 1, main_2, 1)$ we need to check each predecessor of $main_2$. There is only one, $inc_1$, but $st(inc_1, main_2)$ is the return transition of procedure \texttt{inc}, which necessitates the usage of a new PDR instance. \\
+	To block the proof-obligation $(y \neq x + 1, main_2, 1)$ we need to check each predecessor of $main_2$. There is only one, $inc_1$, but $st(inc_1, main_2)$ is the return transition of procedure \texttt{inc}, which necessitates the creation of a new PDR instance. \\ \\
 	First get the CFG of procedure \texttt{inc}: \\ \\
 	
 	\begin{center}
@@ -1282,10 +1297,10 @@ urlcolor=g1          % color of external links
 	\end{tikzpicture}
 	\captionof{figure}{$CFG$ of \texttt{inc}}
 	\end{center}
-	The initial proof-obligation of this sub-execution is $(y \neq x + 1, inc_1, 1)$, so the same predicate as in the initial obligation, but on $inc_1$. \\
+	The initial proof-obligation of this second instance is $(y \neq x + 1, inc_1, 1)$, so the same predicate as in the initial obligation but on $inc_1$. \\
 	
-	\textsl{5. Step: Sub-PDR Local Frame and First Level Initialization} \\
-	For this Sub-PDR we do not need the local frames of \texttt{main} but a new array that integrates only locations found in \texttt{inc}. \\
+	\textsl{5. Step: Second PDR Local Frame and First Level Initialization} \\
+	For this second instance we do not need the local frames of \texttt{main} but a new array that integrates only locations found in \texttt{inc}. \\
 	
 		\begin{minipage}{.5\textwidth}
 		\setlength\tabcolsep{0.35em}
@@ -1327,17 +1342,17 @@ urlcolor=g1          % color of external links
 	\vspace*{1em}
 	
 	
-	\textsl{6. Step: Sub-PDR Blocking Phase} \\
+	\textsl{6. Step: Second PDR First Blocking Phase} \\
 	To block proof-obligation $(y \neq x + 1, inc_1, 1)$ we check the predecessor $inc_0$ of $inc_1$: \\
 		\begin{equation*}
 		\underbrace{true}_{F_{0, inc_0}}\; \land \; \underbrace{y_3' = y_2 + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x + 1}_{p'}
 		\end{equation*}
 		\jw{In dem fall dass eine variable weder in In oder Out vorkommt ist sie Aux, oder einfach eine freie Variable? Hier x}
 		This is satisfiable because we do not know anything about x in this context. \\
-		We generate a proof-obligation on level 0, terminating the sub-PDR returning that the proof-obligation is satisfiable. \\ \\
+		We generate a proof-obligation on level 0, terminating the PDR instance returning that the proof-obligation is satisfiable. \\ \\
 	
 	\textsl{7. Step: Blocking of Procedure inc} \\
-	We know now, that it is possible to reach the error through \texttt{inc}. To know what has to hold for that to happen, we compute the precondition $pre(y \neq x + 1, y = y + 1) = y \neq x$. We know have to prove whether $y \neq x$ holds when entering \texttt{inc} meaning that it holds at the call location $main_1$. We get a new proof-obligation $(y \neq x, main_1, 1)$. A third PDR instance is needed. \\ \\
+	We know now, that it is possible to reach the error through \texttt{inc}. To know what has to hold for that to happen, we compute the precondition $pre(y \neq x + 1, y = y + 1) = (y \neq x)$. We have to prove whether $y \neq x$ holds when entering \texttt{inc} or not. We get a new proof-obligation $(y \neq x, main_1, 1)$. A third PDR instance is needed. \\ \\
 	
 	\textsl{8. Step: PDR on Remainder of Program} \\
 	Get the CFG of the remainder of the program: \\ \\
@@ -1369,7 +1384,7 @@ urlcolor=g1          % color of external links
 	;
 	);
 	\end{tikzpicture}
-	\captionof{figure}{$CFG$ of $P_2$ remainder}
+	\captionof{figure}{$CFG$ of $P_2$ Remainder}
 	\label{fig:rect}
 	\end{center}
 	
@@ -1413,14 +1428,14 @@ urlcolor=g1          % color of external links
 		\end{center}	
 	\end{minipage}
 	
-	\vspace*{1em}
+	\vspace*{2em}
 	
 	\textsl{10. Step: Third PDR First Blocking Phase} \\
 		To block proof-obligation $(y \neq x, main_1, 1)$ we check the predecessor $main_0$ of $main_1$: \\
 	\begin{equation*}
 	\underbrace{true}_{F_{0, main_0}}\; \land \; \underbrace{x_0' = 0 \; \land \; y_0' = 0}_{\psi_0} \land \; \underbrace{y_0' \neq x_0'}_{p'}
 	\end{equation*}
-	Which is unsatisfiable, update the local frames of $main_1$ with $\neg(y \neq y) \equiv (y = x)$: \\ 
+	Which is unsatisfiable, update the local frames of $main_1$ with $\neg(y \neq y) \equiv (y = x)$: \\ \\ 
 	\begin{minipage}{.5\textwidth}
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
@@ -1448,7 +1463,7 @@ urlcolor=g1          % color of external links
 				Local Frames & \texttt{remainder}\\
 				\toprule
 				& level \\
-				\cmidrule(lr){2-2}
+				\cmidrule(lr){2-3}
 				location & 0 & 1 \\
 				\cmidrule{1-3}
 				$main_0$ & $true$ & $true$ \\
@@ -1458,7 +1473,7 @@ urlcolor=g1          % color of external links
 		\end{center}	
 	\end{minipage}
 	
-	\vspace*{1em}
+	\vspace*{2em}
 	
 	There are no other proof-obligations left, start the first propagation-phase. \\ \\
 	
@@ -1505,15 +1520,15 @@ urlcolor=g1          % color of external links
 		\end{center}	
 	\end{minipage}
 	
-	\vspace*{1em}
-	New initial proof-obligation. $(y \neq x, main_1, 1)$. \\ \\
+	\vspace*{2em}
+	New initial proof-obligation. $(y \neq x, main_1, 2)$. \\ \\
 	
 	\textsl{13. Step: Third PDR Second Blocking Phase} \\
 	To block proof-obligation $(y \neq x, main_1, 2)$ we check the predecessor $main_0$ of $main_1$: \\
 	\begin{equation*}
 	\underbrace{true}_{F_{1, main_0}}\; \land \; \underbrace{x_0' = 0 \; \land \; y_0' = 0}_{\psi_0} \land \; \underbrace{y_0' \neq x_0'}_{p'}
 	\end{equation*}
-	Which is also unsatisfiable, we again update the frames of $main_1$: \\ 
+	Which is also unsatisfiable, we again update the frames of $main_1$: \\ \\
 	\begin{minipage}{.4\textwidth}
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
@@ -1549,11 +1564,14 @@ urlcolor=g1          % color of external links
 				\bottomrule
 			\end{tabu}
 		\end{center}	
-	\end{minipage} \\ \\
+	\end{minipage} 
+
+	\vspace*{2em}
+
 	\textsl{14. Step: Third PDR Second Propagation Phase} \\
 	There is a fixpoint in the local frames, we see levels 1 and 2 are the equal.
 	This means that the precondition for the procedure to lead to the error is not reachable.
-	We now update the global frames with the local frames of remainder and update the initial location of \texttt{inc} with $y = x$ because we know now that this holds before entering the procedure. The global frames contain every locations where local frames do not, any location that is not covered by local get new levels initialized as true. We get updated global frames: \\
+	We now update the global frames with the local frames of remainder and update the initial location of \texttt{inc} with $y = x$ because we know now that this holds before entering the procedure. \\ The global frames contain every location where local frames do not, any location that is not covered by local get new levels initialized as true. We get updated global frames: \\
 	
 	\begin{minipage}{.4\textwidth}
 		\setlength\tabcolsep{0.35em}
@@ -1591,11 +1609,13 @@ urlcolor=g1          % color of external links
 			\end{tabu}
 		\end{center}	
 	\end{minipage}
+
+	\vspace*{2em}
 	
-	However we still have to block the proof-obligation from the second PDR instance: $(y \neq x + 1, inc_1, 1)$. Restart the second instance. \\ \\
+	However we still have to block the proof-obligation from the second PDR instance: \\ $(y \neq x + 1, inc_1, 1)$. \\ Restart the second instance. \\ \\
 	
-	\textsl{15. Step: Second Instance Initialization} \\
-	We again start by initializing the local using the global frames: \\
+	\textsl{15. Step: Second PDR Initialization} \\
+	We again start by initializing the local using the global frames: \\ \\
 	\begin{minipage}{.4\textwidth}
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
@@ -1603,9 +1623,9 @@ urlcolor=g1          % color of external links
 				Global Frames \\
 				\toprule
 				& level \\
-				\cmidrule(lr){2-2}
+				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
-				\cmidrule{1-2}
+				\cmidrule{1-4}
 				$main_0$ & $true$ & $true$ & $true$  \\
 				$main_1$ & $false$ & $y = x$ & $y = x$\\
 				$main_2$ & $false$ & $true$ & $true$ \\
@@ -1631,10 +1651,12 @@ urlcolor=g1          % color of external links
 				\bottomrule
 			\end{tabu}
 		\end{center}	
-	\end{minipage} \\ \\
+	\end{minipage} 
+
+\vspace*{2em}
 
 \textsl{16. Step: Second PDR First Iteration} \\
-Again, instead of initializing level 1 frames as true, we make use of what we learned before by using the global frames: \\
+Instead of initializing level 1 frames as true, we make use of what we learned before by using the global frames: \\
 
 \begin{minipage}{.4\textwidth}
 	\setlength\tabcolsep{0.35em}
@@ -1643,9 +1665,9 @@ Again, instead of initializing level 1 frames as true, we make use of what we le
 			Global Frames \\
 			\toprule
 			& level \\
-			\cmidrule(lr){2-2}
+			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
-			\cmidrule{1-2}
+			\cmidrule{1-4}
 			$main_0$ & $true$ & $true$ & $true$  \\
 			$main_1$ & $false$ & $y = x$ & $y = x$\\
 			$main_2$ & $false$ & $true$ & $true$ \\
@@ -1681,7 +1703,7 @@ To block proof-obligation $(y \neq x + 1, inc_1, 1)$ we check the predecessor $i
 \underbrace{y_2 = x_0}_{F_{0, inc_0}}\; \land \; \underbrace{y_3' = y_2 + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x_0 + 1}_{p'}
 \end{equation*}
 
-Which is unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \neq x + 1) \equiv (y = x + 1)$: \\ \\
+Which is now unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \neq x + 1) \equiv (y = x + 1)$: \\ \\
 
 
 \begin{minipage}{.4\textwidth}
@@ -1691,9 +1713,9 @@ Which is unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \neq x 
 			Global Frames \\
 			\toprule
 			& level \\
-			\cmidrule(lr){2-2}
+			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
-			\cmidrule{1-2}
+			\cmidrule{1-4}
 			$main_0$ & $true$ & $true$ & $true$  \\
 			$main_1$ & $false$ & $y = x$ & $y = x$\\
 			$main_2$ & $false$ & $true$ & $true$ \\
@@ -1721,10 +1743,10 @@ Which is unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \neq x 
 	\end{center}	
 \end{minipage}
 
-\vspace*{1em}
+\vspace*{2em}
 \textsl{18. Step: Second PDR First Propagation Phase} \\
-There is no fixpoint. \\
-After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works analogously as step 17 just on level 2, we get frames: \\
+There is no fixpoint in the local frames yet, meaning we would start a new Iteration with the same proof-obligation but on an incremented level.\\
+After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works analogously to step 17 just on level 2, we get frames: \\ \\ 
 
 \begin{minipage}{.4\textwidth}
 	\setlength\tabcolsep{0.35em}
@@ -1733,9 +1755,9 @@ After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works a
 			Global Frames \\
 			\toprule
 			& level \\
-			\cmidrule(lr){2-2}
+			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
-			\cmidrule{1-2}
+			\cmidrule{1-4}
 			$main_0$ & $true$ & $true$ & $true$  \\
 			$main_1$ & $false$ & $y = x$ & $y = x$\\
 			$main_2$ & $false$ & $true$ & $true$ \\
@@ -1763,10 +1785,166 @@ After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works a
 	\end{center}	
 \end{minipage} \\ \\
 
-And fixpoint level 1 and 2. \\ 
-\jw{TODO the rest.}
-	
-	
+Fixpoint at level 1 and 2, result is that the procedure now no longer leads to the initial proof-obligation anymore. Update global frames with the local frames of \texttt{inc}: \\ \\
+
+\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2 \\
+			\cmidrule{1-4}
+			$main_0$ & $true$ & $true$ & $true$  \\
+			$main_1$ & $false$ & $y = x$ & $y = x$\\
+			$main_2$ & $false$ & $true$ & $true$ \\
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+			$inc_1$ & $false$ & $y = x + 1$ & $y = x + 1$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.6\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Local Frames & \texttt{inc}\\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2\\
+			\cmidrule{1-4}
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$  \\
+			$inc_1$ & $false$ & $y = x + 1$  & $y = x + 1$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}	
+\end{minipage} \\ \\
+
+With that we have blocked the very first PDR's initial proof-obligation $(y \neq x + 1, main_2, 1)$. Update $main_2$ global frames with $\neg(y \neq x + 1) \equiv (y = x + 1)$ : \\
+
+\setlength\tabcolsep{0.35em}
+\begin{center}
+	\begin{tabu}{cccc}
+		Global Frames \\
+		\toprule
+		& level \\
+		\cmidrule(lr){2-2}
+		location & 0 & 1 & 2 \\
+		\cmidrule{1-2}
+		$main_0$ & $true$ & $true$ & $true$  \\
+		$main_1$ & $false$ & $y = x$ & $y = x$\\
+		$main_2$ & $false$ & $y = x + 1$ & $y = x + 1$ \\
+		$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+		$inc_1$ & $false$ & $true$ & $true$\\
+		\bottomrule
+	\end{tabu}
+\end{center}
+
+\vspace*{2em}
+
+\textsl{19. Step: First PDR Blocking Phase} \\
+After the preceding two PDR instances we finally have blocked the initial proof-obligation of the first instance. We update the local frames of \texttt{main}: \\
+
+\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{cccc}
+				Global Frames \\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-4}
+				location & 0 & 1 & 2 \\
+				\cmidrule{1-4}
+				$main_0$ & $true$ & $true$ & $true$  \\
+				$main_1$ & $false$ & $y = x$ & $y = x$\\
+				$main_2$ & $false$ & $y = x + 1$ & $y = x + 1$ \\
+				$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+				$inc_1$ & $false$ & $true$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+		\begin{center}
+			\begin{tabu}{ccc}
+				Local Frames & \texttt{main}\\
+				\toprule
+				& level \\
+				\cmidrule(lr){2-3}
+				location & 0 & 1 \\
+				\cmidrule{1-3}
+				$main_0$ & $true$ & $true$ \\
+				$main_1$ & $false$ & $true$\\
+				$main_2$ & $false$ & $y = x + 1$\\
+				$inc_0$ & $true$ & $true$\\
+				$inc_1$ & $false$ & $true$\\
+				\bottomrule
+			\end{tabu}
+		\end{center}	
+\end{minipage}
+
+\vspace*{2em}
+
+\textsl{20. Step First PDR First Propagation Phase} \\
+Do we have a fixpoint in \texttt{main}'s local frames? No, start new Iteration of first PDR with same initial proof-obligation on an incremented level. \\ \\
+
+\textsl{21. Step First PDR Next Iteration} \\
+Because there is no fixpoint in the local frames we have to do steps 4 to 20 again, this time for the initial proof-obligation $(y \neq x + 1, main_2, 2)$ which results in the following frames: \\ \\
+
+	\begin{minipage}{.5\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Global Frames \\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2 \\
+			\cmidrule{1-4}
+			$main_0$ & $true$ & $true$ & $true$  \\
+			$main_1$ & $false$ & $y = x$ & $y = x$\\
+			$main_2$ & $false$ & $y = x + 1$ & $y = x + 1$ \\
+			$inc_0$ & $y = x$ & $y = x$ & $y = x$ \\
+			$inc_1$ & $false$ & $true$ & $true$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}
+\end{minipage}
+\hfill
+\begin{minipage}{.4\textwidth}
+	\setlength\tabcolsep{0.35em}
+	\begin{center}
+		\begin{tabu}{cccc}
+			Local Frames & \texttt{main}\\
+			\toprule
+			& level \\
+			\cmidrule(lr){2-4}
+			location & 0 & 1 & 2\\
+			\cmidrule{1-4}
+			$main_0$ & $true$ & $true$ & $true$\\
+			$main_1$ & $false$ & $true$ & $true$\\
+			$main_2$ & $false$ & $y = x + 1$ & $y = x + 1$\\
+			$inc_0$ & $true$ & $true$ & $true$\\
+			$inc_1$ & $false$ & $true$ & $true$\\
+			\bottomrule
+		\end{tabu}
+	\end{center}	
+\end{minipage}
+
+\vspace*{1em}
+
+\textsl{22. Step First PDR Second Propagation Phase} \\
+We see that the local frames of \texttt{main} have fixpoint level 1 and 2, which means that the error location is not reachable, making the first PDR instance safe.  \\ \\
+
+\textsl{23. Global Propagation Phase} \\
+We now check if there is a fixpoint in the global frames as well. Which is true as level 1 equals 2, with that we return that the whole program is safe.
+
 	
 	
 	
