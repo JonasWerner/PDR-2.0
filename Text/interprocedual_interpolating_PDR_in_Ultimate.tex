@@ -90,6 +90,9 @@ urlcolor=g1          % color of external links
 \fi
 \setlength\parindent{0pt}
 
+\newcommand{\WidestEntry}{$\psi_{global}$}%
+\newcommand{\SetToWidest}[1]{\makebox[\widthof{\WidestEntry}]{$#1$}}%
+
 \newcommand{\jw}[1]{\mycom{\todo[color=blue!40,inline]{\small JW: #1}}}
 \newcommand{\jwl}[1]{\mycom{\todo[color=blue!40,inline,caption={Beschreibung},nolist]{\small #1}}}
 \newcommand{\dd}[1]{\mycom{\todo[color=orange!40,inline]{\small DD: #1}}}
@@ -275,7 +278,7 @@ urlcolor=g1          % color of external links
 	
 	\subsection*{Example 2:}
 	Assume we are given program $P_1$ that is represented by CFG $G_1$ \\ $G_1 = (\{ \ell_1, \ell_2 \}, \{ (\ell_1, \ell_2)\}, \ell_1, \emptyset, ((\ell_1, \ell_2) 
-	\mapsto \psi_1))$
+	\mapsto \psi_1))$ \\ \\
 
 		\begin{minipage}{.3\textwidth}
 			\centering
@@ -324,6 +327,7 @@ urlcolor=g1          % color of external links
 			\captionof{figure}{$G_1$}
 			\label{fig:rect}
 		\end{minipage}%
+	
 \bigskip
 
 	Where $\psi_1 = (\invars_1, \outvars_1, \auxvars_1, \varphi_1, \widehat{\varphi}_1)$ is a transformula consisting of: 
@@ -513,6 +517,7 @@ urlcolor=g1          % color of external links
 		\end{itemize}
 	\end{mydef}
 	
+	\subsection*{Example 4:}
 	Assume we are given program $P_2$ that is represented by ICFG $IG_2 = (Loc_2, \Delta_2, \ell_{init}, \ell_E, st_2, proc_2)$
 	\begin{itemize}
 		\item  $Loc_2= \{ main_0, main_1,  main_2, inc_1, inc_2 \} $
@@ -561,7 +566,7 @@ urlcolor=g1          % color of external links
 		
 		\path (1) edge node {%
 			$
-			\psi_0 := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_0} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
@@ -570,12 +575,13 @@ urlcolor=g1          % color of external links
 			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
 			\end{array}
 			\right.
+			\end{array}
 			$ %
 		} (2)
 		;
 		\path (2)[densely dotted] edge node {%
 			$
-			\psi_{global} := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_{global}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
 			\outvars      & = & \{ y \mapsto y_1' \} \\
@@ -584,10 +590,11 @@ urlcolor=g1          % color of external links
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
 			\end{array}
 			\right.
+			\end{array}
 			$ %
 		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
 			$
-			\psi_{old} := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_{old}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{y \mapsto y_{2} \} \\
 			\outvars      & = & \{y_{old} \mapsto y_{old_1}' \} \\
@@ -596,26 +603,28 @@ urlcolor=g1          % color of external links
 			\widehat{\varphi} & = & c_{{old_y}}' = c_{y} \\
 			\end{array}
 			\right.
+			\end{array}
 			$ } (3)
 	
 		;
 		\path (3) edge node {%
 			$
-			\psi_{1} := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
 			\outvars      & = & \{ y \mapsto y_{3}' \} \\
 			\auxvars      & = & \emptyset \\
 			\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
 			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
-		\end{array}
+			\end{array}
 			\right.
+			\end{array}
 			$ %
 		} (4)
 		;
 		\path (4)[densely dotted] edge node {%
 			$
-			\psi_{return} := \left\{
+		\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \emptyset \\
 			\outvars      & = & \emptyset \\
@@ -624,6 +633,7 @@ urlcolor=g1          % color of external links
 			\widehat{\varphi} & = & true \\
 			\end{array}
 			\right.
+			\end{array}
 			$ %
 		} (5)
 		;
@@ -1052,78 +1062,82 @@ urlcolor=g1          % color of external links
 		\node[state] (5) [below of=4] {$main_2$};
 		
 		\node[state] (6) [below of=5] {$main_E$};
-		
-		\path (1) edge node {%
-			$
-			\psi_0 := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \emptyset \\
-			\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
-			\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
-			\end{array}
-			\right.
-			$ %
-		} (2)
-		;
-		\path (2)[densely dotted] edge node {%
-			$
-			\psi_{global} := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
-			\outvars      & = & \{ y \mapsto y_1' \} \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_1' = y_{old_0} \\
-			\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
-			\end{array}
-			\right.
-			$ %
-		} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
-			$
-			\psi_{old} := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \{y \mapsto y_{2} \} \\
-			\outvars      & = & \{y_{old} \mapsto y_{old_1}' \} \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & y_{old_1}' = y_{2} \\
-			\widehat{\varphi} & = & c_{{old_y}}' = c_{y} \\
-			\end{array}
-			\right.
-			$ } (3)
-		
-		;
-		\path (3) edge node {%
-			$
-			\psi_{1} := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
-			\outvars      & = & \{ y \mapsto y_{3}' \} \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
-			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
-			\end{array}
-			\right.
-			$ %
-		} (4)
-		;
-		\path (4)[densely dotted] edge node {%
-			$
-			\psi_{return} := \left\{
-			\begin{array}{lcl}
-			\invars       & = & \emptyset \\
-			\outvars      & = & \emptyset \\
-			\auxvars      & = & \emptyset \\
-			\varphi       & = & true\\
-			\widehat{\varphi} & = & true \\
-			\end{array}
-			\right.
-			$ %
-		} (5)
-		;
+			\path (1) edge node {%
+		$
+		\begin{array}{lcl} \SetToWidest{\psi_0} & := & \left\{
+		\begin{array}{lcl}
+		\invars       & = & \emptyset \\
+		\outvars      & = & \{ x \mapsto x_{0}' , y \mapsto y_{0}' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & x_{0}' = 0 \; \land \; y_{0}' = 0 \\
+		\widehat{\varphi} & = & c_{x}' = 0 \;\land\; c_{y}' = 0 \\
+		\end{array}
+		\right.
+		\end{array}
+		$ %
+	} (2)
+	;
+	\path (2)[densely dotted] edge node {%
+		$
+		\begin{array}{lcl} \SetToWidest{\psi_{global}} & := & \left\{
+		\begin{array}{lcl}
+		\invars       & = & \{y_{old} \mapsto y_{old_0} \} \\
+		\outvars      & = & \{ y \mapsto y_1' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & y_1' = y_{old_0} \\
+		\widehat{\varphi} & = & c_{y}' = c_{old_y} \\
+		\end{array}
+		\right.
+		\end{array}
+		$ %
+	} ($(2)!0.5!(3)$) edge[densely dotted] node[right=0.42\textwidth, below] {%
+		$
+		\begin{array}{lcl} \SetToWidest{\psi_{old}} & := & \left\{
+		\begin{array}{lcl}
+		\invars       & = & \{y \mapsto y_{2} \} \\
+		\outvars      & = & \{y_{old} \mapsto y_{old_1}' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & y_{old_1}' = y_{2} \\
+		\widehat{\varphi} & = & c_{{old_y}}' = c_{y} \\
+		\end{array}
+		\right.
+		\end{array}
+		$ } (3)
+	
+	;
+	\path (3) edge node {%
+		$
+		\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
+		\begin{array}{lcl}
+		\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
+		\outvars      & = & \{ y \mapsto y_{3}' \} \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
+		\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
+		\end{array}
+		\right.
+		\end{array}
+		$ %
+	} (4)
+	;
+	\path (4)[densely dotted] edge node {%
+		$
+		\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
+		\begin{array}{lcl}
+		\invars       & = & \emptyset \\
+		\outvars      & = & \emptyset \\
+		\auxvars      & = & \emptyset \\
+		\varphi       & = & true\\
+		\widehat{\varphi} & = & true \\
+		\end{array}
+		\right.
+		\end{array}
+		$ %
+	} (5)
+	;
 		\path (5)[] edge node {%
 			$
-			\psi_{E} := \left\{
+			\begin{array}{lcl} \SetToWidest{\psi_{E}} & := & \left\{
 			\begin{array}{lcl}
 			\invars       & = & \{ x \mapsto x_1, y \mapsto y_4 \} \\
 			\outvars      & = & \emptyset \\
@@ -1132,6 +1146,7 @@ urlcolor=g1          % color of external links
 			\widehat{\varphi} & = & c_{y} \neq c_x + 1\\
 			\end{array}
 			\right.
+			\end{array}
 			$  %
 		} (6)
 		;
@@ -1242,8 +1257,8 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{ccc}
 				Local Frames & \texttt{main}\\
 				\toprule
-				& level \\
-				\cmidrule(lr){2-2}
+				& \multicolumn{2}{c}{level} \\
+				\cmidrule(lr){2-3}
 				location & 0 & 1 \\
 				\cmidrule{1-3}
 				$main_0$ & $true$ & $true$ \\
@@ -1308,7 +1323,7 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{cc}
 				Global Frames \\
 				\toprule
-				& level \\
+				&\multicolumn{1}{c}{level} \\
 				\cmidrule(lr){2-2}
 				location & 0 \\
 				\cmidrule{1-2}
@@ -1328,8 +1343,8 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{ccc}
 				Local Frames & \texttt{inc} \\
 				\toprule
-				& level \\
-				\cmidrule(lr){2-2}
+				& \multicolumn{2}{c}{level} \\
+				\cmidrule(lr){2-3}
 				location & 0 & 1 \\
 				\cmidrule{1-3}
 				$inc_0$ & $true$ & $true$ \\
@@ -1417,9 +1432,9 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{ccc}
 				Local Frames & \texttt{remainder}\\
 				\toprule
-				& level \\
-				\cmidrule(lr){2-2}
-				location & 0 \\
+				& \multicolumn{2}{c}{level} \\
+				\cmidrule(lr){2-3}
+				location & 0 & 1\\
 				\cmidrule{1-3}
 				$main_0$ & $true$ & $true$ \\
 				$main_1$ & $false$ & $true$\\
@@ -1462,9 +1477,9 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{ccc}
 				Local Frames & \texttt{remainder}\\
 				\toprule
-				& level \\
+				& \multicolumn{2}{c}{level} \\
 				\cmidrule(lr){2-3}
-				location & 0 & 1 \\
+				location & 0 & 1\\
 				\cmidrule{1-3}
 				$main_0$ & $true$ & $true$ \\
 				$main_1$ & $false$ & $y = x$\\
@@ -1507,9 +1522,9 @@ urlcolor=g1          % color of external links
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
 			\begin{tabu}{cccc}
-				Local Frames & \texttt{remainder}\\
+				Local Frames & \multicolumn{2}{c}{\texttt{remainder}} \\
 				\toprule
-				& level \\
+					& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1553,9 +1568,9 @@ urlcolor=g1          % color of external links
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
 			\begin{tabu}{cccc}
-				Local Frames & \texttt{remainder}\\
+				Local Frames & \multicolumn{2}{c}{\texttt{remainder}} \\
 				\toprule
-				& level \\
+				& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1579,7 +1594,7 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{cccc}
 				Global Frames \\
 				\toprule
-				& level \\
+				& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1597,9 +1612,9 @@ urlcolor=g1          % color of external links
 		\setlength\tabcolsep{0.35em}
 		\begin{center}
 			\begin{tabu}{cccc}
-				Local Frames & \texttt{remainder}\\
+				Local Frames & \multicolumn{2}{c}{\texttt{remainder}} \\
 				\toprule
-				& level \\
+				& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1622,7 +1637,7 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{cccc}
 				Global Frames \\
 				\toprule
-				& level \\
+				& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1664,7 +1679,7 @@ Instead of initializing level 1 frames as true, we make use of what we learned b
 		\begin{tabu}{cccc}
 			Global Frames \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
 			\cmidrule{1-4}
@@ -1684,7 +1699,7 @@ Instead of initializing level 1 frames as true, we make use of what we learned b
 		\begin{tabu}{ccc}
 			Local Frames & \texttt{inc}\\
 			\toprule
-			& level \\
+			& \multicolumn{2}{c}{level} \\
 			\cmidrule(lr){2-3}
 			location & 0 & 1  \\
 			\cmidrule{1-3}
@@ -1712,7 +1727,7 @@ Which is now unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \ne
 		\begin{tabu}{cccc}
 			Global Frames \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
 			\cmidrule{1-4}
@@ -1732,7 +1747,7 @@ Which is now unsatisfiable. We can update the frames of $inc_1$ with $\neg(y \ne
 		\begin{tabu}{ccc}
 			Local Frames & \texttt{inc}\\
 			\toprule
-			& level \\
+			& \multicolumn{2}{c}{level} \\
 			\cmidrule(lr){2-3}
 			location & 0 & 1  \\
 			\cmidrule{1-3}
@@ -1754,7 +1769,7 @@ After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works a
 		\begin{tabu}{cccc}
 			Global Frames \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
 			\cmidrule{1-4}
@@ -1772,9 +1787,9 @@ After the blocking of proof-obligation $(y \neq x + 1, inc_1, 2)$, which works a
 	\setlength\tabcolsep{0.35em}
 	\begin{center}
 		\begin{tabu}{cccc}
-			Local Frames & \texttt{inc}\\
+			Local Frames & \multicolumn{1}{c}{\texttt{inc}} \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2\\
 			\cmidrule{1-4}
@@ -1793,7 +1808,7 @@ Fixpoint at level 1 and 2, result is that the procedure now no longer leads to t
 		\begin{tabu}{cccc}
 			Global Frames \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
 			\cmidrule{1-4}
@@ -1807,13 +1822,13 @@ Fixpoint at level 1 and 2, result is that the procedure now no longer leads to t
 	\end{center}
 \end{minipage}
 \hfill
-\begin{minipage}{.6\textwidth}
+\begin{minipage}{.45\textwidth}
 	\setlength\tabcolsep{0.35em}
 	\begin{center}
 		\begin{tabu}{cccc}
 			Local Frames & \texttt{inc}\\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2\\
 			\cmidrule{1-4}
@@ -1831,10 +1846,10 @@ With that we have blocked the very first PDR's initial proof-obligation $(y \neq
 	\begin{tabu}{cccc}
 		Global Frames \\
 		\toprule
-		& level \\
-		\cmidrule(lr){2-2}
+		& \multicolumn{3}{c}{level} \\
+		\cmidrule(lr){2-4}
 		location & 0 & 1 & 2 \\
-		\cmidrule{1-2}
+		\cmidrule{1-4}
 		$main_0$ & $true$ & $true$ & $true$  \\
 		$main_1$ & $false$ & $y = x$ & $y = x$\\
 		$main_2$ & $false$ & $y = x + 1$ & $y = x + 1$ \\
@@ -1855,7 +1870,7 @@ After the preceding two PDR instances we finally have blocked the initial proof-
 			\begin{tabu}{cccc}
 				Global Frames \\
 				\toprule
-				& level \\
+				& \multicolumn{3}{c}{level} \\
 				\cmidrule(lr){2-4}
 				location & 0 & 1 & 2 \\
 				\cmidrule{1-4}
@@ -1875,7 +1890,7 @@ After the preceding two PDR instances we finally have blocked the initial proof-
 			\begin{tabu}{ccc}
 				Local Frames & \texttt{main}\\
 				\toprule
-				& level \\
+				& \multicolumn{2}{c}{level} \\
 				\cmidrule(lr){2-3}
 				location & 0 & 1 \\
 				\cmidrule{1-3}
@@ -1903,7 +1918,7 @@ Because there is no fixpoint in the local frames we have to do steps 4 to 20 aga
 		\begin{tabu}{cccc}
 			Global Frames \\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2 \\
 			\cmidrule{1-4}
@@ -1917,13 +1932,13 @@ Because there is no fixpoint in the local frames we have to do steps 4 to 20 aga
 	\end{center}
 \end{minipage}
 \hfill
-\begin{minipage}{.4\textwidth}
+\begin{minipage}{.45\textwidth}
 	\setlength\tabcolsep{0.35em}
 	\begin{center}
 		\begin{tabu}{cccc}
 			Local Frames & \texttt{main}\\
 			\toprule
-			& level \\
+			& \multicolumn{3}{c}{level} \\
 			\cmidrule(lr){2-4}
 			location & 0 & 1 & 2\\
 			\cmidrule{1-4}
