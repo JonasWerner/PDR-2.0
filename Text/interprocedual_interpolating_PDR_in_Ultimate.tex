@@ -981,6 +981,7 @@ urlcolor=g1          % color of external links
 	\jw{Explain why normal PDR does not work on procedures.}
 	
 	\section{Interprocedual PDR}
+	\jw{Rewrite this for changed global frames: Global frames are now only a map of locations to disjunction of predicates}
 	For using our PDR algorithm on programs with multiple programs and their representation as ICFGs, we propose the following recursive extension to our algorithm.
 	\subsection{Recursive PDR}
 	Because of the backwards-search like manner of PDR, it always finds a return transition before a call to another procedure. Our idea was to check those two procedures individually, meaning when PDR finds a return transition, it takes the sub-graph of the ICFG, that contains the corresponding procedure, handles it as a CFG and starts a new instance of PDR on that. \\ \\
