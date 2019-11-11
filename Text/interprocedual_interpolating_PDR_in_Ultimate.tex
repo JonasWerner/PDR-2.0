@@ -121,7 +121,10 @@ urlcolor=g1          % color of external links
 	\maketitle
 	
 	\begin{abstract}
-	In a previous project we implemented a library using PDR for software verification in the program analysis framework ULTIMATE. However \jw{...}
+	In a previous project we implemented a library using Property Directed Reachability (PDR) for software verification in the program analysis framework ULTIMATE. However there were two problems left: 
+	lack of functionality on programs with more than one procedure and the missing usage of interpolants. 
+	The goal of this project was to develop techniques to fix both of them. \\
+	We devised a paradigm of using our library in a recursive manner to tackle multiple procedure calls and introduce a way of integrating interpolants into the functionality of PDR.
 	\end{abstract}
 	
 	
@@ -664,7 +667,10 @@ urlcolor=g1          % color of external links
 			\item $I$ consists only of variables found in $A \cap B$
 		\end{itemize}
 	\end{mydef}
-
+	Interpolant can cover a greater state space than the individual formula A can.
+	For example, assume we are given the formulas $A: (x = 5)$ and $B: (x < 0)$, we can see that $A \land B: (x = 5 \land x < 0)$ is unsatisfiable. A possible interpolant $I$ for this pair would be $I: (x > 0)$
+	tells us more than just $x = 5$. \\
+	Usage of interpolants can speed up the computation of fixpoints in PDR.
 	\pagebreak
 	
 	%-------------------------------------------------%
@@ -703,10 +709,10 @@ urlcolor=g1          % color of external links
 		\item $st(\ell_{pre}, \ell)$ being the transformula assigned to transition $(\ell_{pre}, \ell)$
 		\item $p'$ being the primed variant of $p$. Every termvariable in $p$ has been substituted by the corresponding primed out-variable of $st(\ell_{pre}, \ell)$
 	\end{itemize}
-	This conjunction is checked for satisfiability by an SMT-solver.
+	This conjunction is checked for satisfiability using an SMT-solver.
 	\begin{itemize}
-		\item If unsatisfiable: PDR blocks the proof-obligation by updating $F_{i, \ell} = F_{i, \ell} \land \neg p$. \\ In case there is a future proof-obligation $(p, ell_{succ}, i + 1)$ for a successor $\ell_{succ}$ of $\ell$ generated, then PDR knows already that $p$ is not reachable. The proof-obligation is discarded form the stack.
-		\item If satisfiable: PDR cannot prove that the proof-obligation is unreachable yet. Generate a new proof-obligation $po_i = (pre(st(\ell_{pre}, \ell), p), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$, with $pre(st(\ell_{pre}, \ell), p)$ being the precondition of transformula $st(\ell_{pre}, \ell)$ and $p$. Both the new proof-obligations and the old proof-obligation are added on top of the proof-obligation stack.
+		\item If \texttt{unsatisfiable}: PDR blocks the proof-obligation by updating $F_{i, \ell} = F_{i, \ell} \land \neg p$. \\ In case there is a future proof-obligation $(p, ell_{succ}, i + 1)$ for a successor $\ell_{succ}$ of $\ell$ generated, then PDR knows already that $p$ is not reachable. The proof-obligation is discarded form the stack.
+		\item If  \texttt{satisfiable}: PDR cannot prove that the proof-obligation is unreachable yet. Generate a new proof-obligation $po_i = (pre(st(\ell_{pre}, \ell), p), \ell_{pre}, i-1) $ for each predecessor location $\ell_{pre}$ of $\ell$, with $pre(st(\ell_{pre}, \ell), p)$ being the precondition of transformula $st(\ell_{pre}, \ell)$ and $p$. Both the new proof-obligations and the old proof-obligation are added on top of the proof-obligation stack.
 	\end{itemize}
 	This continues until there is a proof-obligation with level 0, proving the program unsafe, or the stack becomes empty.
 	\bigskip
@@ -717,7 +723,6 @@ urlcolor=g1          % color of external links
 	\end{mydef}
 	If there is neither a proof-obligation on level 0 or a fixpoint PDR starts the next iteration on an incremented level.
 	
-	\jw{Say that the termvariables in the frames are being substituted by the in-variables of TF}
 	
 	\bigskip
 	
@@ -856,7 +861,7 @@ urlcolor=g1          % color of external links
 	\hspace*{5cm}
 	
 	
-	We see there is only one transition leading to $\ell_E$, $(\ell_1, x \neq y, \ell_E)$. We get the initial proof-obligation $(x \neq y, \ell_1, 1)$. \\ \\ \par
+	We see there is only one transition leading to $\ell_E$, $(\ell_1, \ell_E)$. To get the initial proof-obligation, we take transformula $st(\ell_1, \ell_E) = \psi_E$ and use its $\phi$ to create a predicate by substituting every termvariable found in the formula by its corresponding program variable. We get the initial proof-obligation $(x \neq y, \ell_1, 1)$. \\ \\ \par
 	\textsl{3. Step: First Blocking Phase} \\
 	To block the initial proof-obligation $(x \neq y, \ell_1, 1)$ we have to check the two predecessors of $\ell_1$:
 	
@@ -981,7 +986,6 @@ urlcolor=g1          % color of external links
 	\jw{Explain why normal PDR does not work on procedures.}
 	
 	\section{Interprocedual PDR}
-	\jw{Rewrite this for changed global frames: Global frames are now only a map of locations to disjunction of predicates}
 	For using our PDR algorithm on programs with multiple programs and their representation as ICFGs, we propose the following recursive extension to our algorithm.
 	\subsection{Recursive PDR}
 	Because of the backwards-search like manner of PDR, it always finds a return transition before a call to another procedure. Our idea was to check those two procedures individually, meaning when PDR finds a return transition, it takes the sub-graph of the ICFG, that contains the corresponding procedure, handles it as a CFG and starts a new instance of PDR on that. \\ \\
@@ -1123,7 +1127,7 @@ urlcolor=g1          % color of external links
 	;
 	\path (4)[densely dotted] edge node {%
 		$
-		\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
+		\begin{array}{lcl} \SetToWidest{\psi_{2}} & := & \left\{
 		\begin{array}{lcl}
 		\invars       & = & \emptyset \\
 		\outvars      & = & \emptyset \\
@@ -1227,7 +1231,7 @@ urlcolor=g1          % color of external links
 	
 	\vspace*{1em}
 	\textsl{3. Step: First Iteration} \\
-	Initialize the first level of the local frames as true for all locations. \\
+	Initialize the first level of the local frames as true for all locations. \\ \\
 	\begin{minipage}{.5\textwidth}
 	\setlength\tabcolsep{0.35em}
 	\begin{center}
@@ -1271,8 +1275,8 @@ urlcolor=g1          % color of external links
 	There is only one transition leading to the error location, we get the initial proof-obligation \\ $(y \neq x + 1, main_2, 1)$  \\ \\
 	
 	\textsl{4. Step: First Blocking-Phase} \\
-	To block the proof-obligation $(y \neq x + 1, main_2, 1)$ we need to check each predecessor of $main_2$. There is only one, $inc_1$, but $st(inc_1, main_2)$ is the return transition of procedure \texttt{inc}, which necessitates the creation of a new PDR instance. \\ \\
-	First get the CFG of procedure \texttt{inc}: \\ \\
+	To block the proof-obligation $(y \neq x + 1, main_2, 1)$ we need to check each predecessor of $main_2$. There is only one: $inc_1$. $st(inc_1, main_2)$ is the return transition of procedure \texttt{inc}, which necessitates the creation of a new PDR instance. \\ \\
+	First, get the CFG of procedure \texttt{inc}: \\ \\
 	
 	\begin{center}
 	\begin{tikzpicture}[%
@@ -1291,23 +1295,24 @@ urlcolor=g1          % color of external links
 	
 	\path (3) edge node {%
 		$
-		\psi_{1} := \left\{
-		\begin{array}{lcl}
-		\invars       & = & \{ y \mapsto y_{2} \} \\
-		\outvars      & = & \{ y \mapsto y_{3}' \} \\
-		\auxvars      & = & \emptyset \\
-		\varphi       & = & \; y_{3}' = y_{2} + 1 \\
-		\widehat{\varphi} & = & c_{y}' = c_{y} + 1 \\
-		\end{array}
-		\right.
-		$ %
+			\begin{array}{lcl} \SetToWidest{\psi_{1}} & := & \left\{
+			\begin{array}{lcl}
+			\invars       & = & \{ y_{old} \mapsto y_{old_2} \} \\
+			\outvars      & = & \{ y \mapsto y_{3}' \} \\
+			\auxvars      & = & \emptyset \\
+			\varphi       & = & \; y_{3}' = y_{old_2} + 1 \\
+			\widehat{\varphi} & = & c_{y}' = c_{old_y} + 1 \\
+			\end{array}
+			\right.
+			\end{array}
+			$ %
 	} (4)
 	;
 	);
 	\end{tikzpicture}
 	\captionof{figure}{$CFG$ of \texttt{inc}}
 	\end{center}
-	The initial proof-obligation of this second instance is $(y \neq x + 1, inc_1, 1)$, so the same predicate as in the initial obligation but on $inc_1$. \\
+	The initial proof-obligation of this second instance is $(y \neq x + 1, inc_1, 1)$, the same predicate as in the initial obligation but on $inc_1$. \\
 	
 	\textsl{5. Step: Second PDR Local Frame and First Level Initialization} \\
 	For this second instance we do not need the local frames of \texttt{main} but a new array that integrates only locations found in \texttt{inc}. \\
@@ -1353,14 +1358,18 @@ urlcolor=g1          % color of external links
 	\textsl{6. Step: Second PDR First Blocking Phase} \\
 	To block proof-obligation $(y \neq x + 1, inc_1, 1)$ we check the predecessor $inc_0$ of $inc_1$: \\
 		\begin{equation*}
-		\underbrace{true}_{F_{0, inc_0}}\; \land \; \underbrace{y_3' = y_2 + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x + 1}_{p'}
+		\underbrace{true}_{F_{0, inc_0}}\; \land \; \underbrace{y_{3}' = y_{old_2} + 1}_{st(inc_0, inc_1)\; = \; \psi_1} \land \; \underbrace{y_3' \neq x + 1}_{p'}
 		\end{equation*}
 		\jw{In dem fall dass eine variable weder in In oder Out vorkommt ist sie Aux, oder einfach eine freie Variable? Hier x}
 		This is satisfiable because we do not know anything about x in this context. \\
 		We generate a proof-obligation on level 0, terminating the PDR instance returning that the proof-obligation is satisfiable. \\ \\
 	
 	\textsl{7. Step: Blocking of Procedure inc} \\
-	We know now, that it is possible to reach the error through \texttt{inc}. To know what has to hold for that to happen, we compute the precondition $pre(y \neq x + 1, y = y + 1) = (y \neq x)$. We have to prove whether $y \neq x$ holds when entering \texttt{inc} or not. We get a new proof-obligation $(y \neq x, main_1, 1)$. A third PDR instance is needed. \\ \\
+	We know now, that it is possible to reach the error through \texttt{inc}. To learn what has to hold for that to happen, we compute the precondition 
+	\begin{equation*}
+		pre(y \neq x + 1, y_{3}' = y_{old_2} + 1) = (y_{old} \neq x)
+	\end{equation*}
+	 We have to prove whether $y_{old} \neq x$ holds when entering \texttt{inc} or not. We get a new proof-obligation $(y_{old} \neq x, main_1, 1)$. A third PDR instance is needed. \\ \\
 	
 	\textsl{8. Step: PDR on Remainder of Program} \\
 	Get the CFG of the remainder of the program: \\ \\
@@ -1435,7 +1444,7 @@ urlcolor=g1          % color of external links
 	\end{minipage}
 	
 	\vspace*{2em}
-	
+	\jw{How does $y_{old} translate to y_0?$}
 	\textsl{10. Step: Third PDR First Blocking Phase} \\
 		To block proof-obligation $(y \neq x, main_1, 1)$ we check the predecessor $main_0$ of $main_1$: \\
 	\begin{equation*}
@@ -1485,7 +1494,7 @@ urlcolor=g1          % color of external links
 	Is there a global fixpoint in the local frames of remainder? No, we start a new iteration. \\ \\
 	
 	\textsl{12. Step: Third PDR Next Iteration} \\
-	Initialize level 2 local frames:
+	Initialize level 2 local frames: \\ \\
 	
 			\begin{minipage}{.4\textwidth}
 		\setlength\tabcolsep{0.35em}
@@ -1493,9 +1502,7 @@ urlcolor=g1          % color of external links
 			\begin{tabu}{cc}
 				Global Frames \\
 				\toprule
-				& level \\
-				\cmidrule(lr){2-2}
-				location & 0 \\
+				location &  \\
 				\cmidrule{1-2}
 				$main_0$ & $true$ \\
 				$main_1$ & $false$ \\
@@ -1928,25 +1935,73 @@ Because there is no fixpoint in the local frames we have to do steps 4 to 20 aga
 \textsl{22. Step First PDR Second Propagation Phase} \\
 We see that the local frames of \texttt{main} have fixpoint level 1 and 2, which means that the error location is not reachable, making the first PDR instance safe.  \\ \\
 
-\textsl{23. Global Propagation Phase} \\
-We now check if there is a fixpoint in the global frames as well. Which is true as level 1 equals 2, with that we return that the whole program is safe.
+There are no PDR instances left and the program has not been proven unsafe, therefore we can say that $P_2$ is safe.
 
 	
 	
 	
 	\pagebreak
 	\section{Using Interpolants}
-	Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
-	\begin{equation}
-	F_{\ell_1, i - 1} \land x' = x + 1 \land x' = 1
-	\end{equation}
-	\begin{equation}
-	F_{\ell_0, i - 1} \land x' = 2 \land x' = 1
-	\end{equation}
-	for satisfiability. \\
-	Formula (3.1) is satisfiable until we get a proof-obligation on level 1, because frame $F_{\ell_1, 0}$ is always false. \\
-	Formula (3.2) is always unsatisfiable, in each level we add $x \neq 1$ to $\ell_1$'s frames. That formula however is not strong enough to block the chain of satisfiable obligations of (3.1) in the next level, which is inefficient.
+Adding the negated proof-obligation to the frames works well in most cases. Consider program $\mathcal{A}$ in Figure 3.4. The initial proof-obligation on level $i$ is $(x = 1, \ell_1, i)$, because $\ell_1$ has two predecessors we have to check:
+\begin{equation}
+F_{\ell_1, i - 1} \land x' = x + 1 \land x' = 1
+\end{equation}
+\begin{equation}
+F_{\ell_0, i - 1} \land x' = 2 \land x' = 1
+\end{equation}
+for satisfiability. \\
+Formula (3.1) is satisfiable until we get a proof-obligation on level 1, because frame $F_{\ell_1, 0}$ is always false. \\
+Formula (3.2) is always unsatisfiable, in each level we add $x \neq 1$ to $\ell_1$'s frames. That formula however is not strong enough to block the chain of satisfiable obligations of (3.1) in the next level, which is inefficient.
+
+\begin{figure}[H]
+	\centering
+	\hspace*{3cm}
+	\begin{tikzpicture}[%
+	->,
+	>=stealth', shorten >=1pt, auto,
+	node distance=2cm, scale=1, 
+	transform shape, align=center,    
+	smallnode/.style={inner sep=1.4}
+	]
+	\node[state](1){$\ell_0$};
 	
+	\node[state] (2) [below of=1] {$\ell_1$};
+	
+	\node[state] (3) [below of=2] {$\ell_E$};
+	
+	
+	
+	
+	\path (1) edge node {$x' = 2$} (2)
+	(2) edge [loop right] node {$x' = x + 1$} (2)
+	(2) edge [edge label={$x = 1$}, swap] node {} (3)
+	;
+	
+	
+	);
+	\end{tikzpicture}
+	\caption{Program $\mathcal{A}$.}
+\end{figure}
+\label{exInterpol} 
+
+Instead, consider using interpolants.
+Let $(A, B)$ be a pair of formulae such that $A \land B$ is unsatisfiable. An interpolant $I$ for $(A, B)$ is a formula fulfilling the following characteristics:
+\begin{itemize}
+	\item $A \Rightarrow I$
+	\item $I \land B$ is unsatisfiable
+	\item $I$ consists only of variables found in $A \cap B$
+\end{itemize}
+\par
+Now, an interpolant for the unsatisfiable formula (3.2) would be $x' = 2$, if we add that to $\ell_1$'s frames, we would be able to block formula (3.1) much earlier.
+	\textsc{Ultimate} already supports ways of computing an interpolant for two given formulas. The idea is, that everytime a query to the SMT-solver is unsatisfiable we, instead of adding the negated proof-obligation to the frames, add a calculated interpolant for the query. \par
+	Let $\ell$ and $\ell_{pre}$ be two locations where $\ell_{pre}$ is a predecessor of $\ell$, $F_{i - 1, \ell_{pre}}$ be a frame, $T_{\ell_{pre} \rightarrow \ell}$ be the transition from $\ell_{pre}$ to $\ell$, and $t'$ be a primed formula. \\
+	To get an interpolant $I$ for that query we define formulae $A$ and $B$, we do that by dividing the query the following way:
+	\begin{equation*}
+	\underbrace{F_{i - 1, \ell_{pre}} \land T_{\ell_{pre} \rightarrow \ell}}_{A} \land \underbrace{t'}_B
+	\end{equation*}
+	Using we can bock loops much more efficiently. 
+	
+	\pagebreak
 	
 	
 	\section{Evaluation}
